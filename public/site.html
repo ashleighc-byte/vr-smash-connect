@@ -93,6 +93,20 @@
   .nav-links a.active { color: var(--white); border-bottom: 2px solid var(--red); }
 
   /* ── Layout ── */
+  .standings-table { width:100%; border-collapse:collapse; font-size:14px; }
+  .standings-table th { text-align:center; padding:0.55rem 0.5rem; border-bottom:2px solid var(--black); font-size:12px; text-transform:uppercase; letter-spacing:0.04em; }
+  .standings-table th:first-child { text-align:left; }
+  .standings-table td { padding:0.55rem 0.5rem; text-align:center; border-bottom:1px solid var(--border); }
+  .standings-table td:first-child { text-align:left; font-weight:700; }
+  .standings-table .rank { font-weight:800; font-size:16px; }
+  .standings-table .top2 { border-left:4px solid #2e7d32; }
+  .standings-table .no-matches { color:#555; font-size:14px; padding:2rem 0; text-align:center; }
+  .match-card { border:1px solid var(--border); border-radius:6px; padding:0.75rem 1rem; margin-bottom:0.75rem; }
+  .match-card .match-header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; }
+  .match-card .match-header .schools { font-weight:700; }
+  .match-card .match-header .score { font-size:13px; color:#555; }
+  .match-card .players { font-size:13px; color:#555; margin-top:4px; }
+  .match-card .games { font-size:13px; color:#333; margin-top:4px; }
   .page { display: none; }
   .page.visible { display: block; }
   .wrap { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
@@ -627,7 +641,7 @@
       <li><a href="#" onclick="showPage('survey-staff')" data-page="survey-staff">Staff survey</a></li>
       <li><a href="#" onclick="showPage('privacy')" data-page="privacy">Privacy</a></li>
       <li><a href="#" onclick="showPage('timeline')" data-page="timeline">Timeline</a></li>
-      <li><a href="/standings">Standings</a></li>
+      <li><a href="#" onclick="showPage('standings')" data-page="standings">Standings</a></li>
     </ul>
   </div>
 </nav>
@@ -2279,6 +2293,25 @@
   </div>
 </div>
 
+<!-- ── PAGE: STANDINGS ── -->
+<div id="page-standings" class="page">
+  <div class="wrap">
+    <div class="section-label">Tournament standings</div>
+    <h1 class="page-title">Standings</h1>
+    <p class="page-desc">Live rankings and match results for the VR Table Tennis interschool pilot.</p>
+
+    <div id="standingsLoading" style="text-align:center;padding:3rem 0;color:var(--mid);font-size:0.9rem;">Loading standings…</div>
+
+    <div id="standingsTable" style="display:none;"></div>
+    <div id="standingsError" style="display:none;text-align:center;padding:2rem;color:var(--red);font-size:0.9rem;"></div>
+
+    <div id="standingsResultsLog" style="display:none;margin-top:2rem;">
+      <h2 style="margin:0 0 0.75rem;font-size:1.1rem;font-weight:700;">Match Results Log</h2>
+      <div id="matchResultsList"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════════════════════════════════════
      JAVASCRIPT
 ══════════════════════════════════════════ -->
@@ -2458,6 +2491,120 @@ function copyNotice() {
   const text = document.getElementById('noticeText').innerText;
   navigator.clipboard.writeText(text).then(() => alert('Notice text copied to clipboard!'));
 }
+
+// ── Standings ──
+const SCHOOLS = ["Piopio","Taumarunui","Ōtorohanga","Te Kuiti"];
+const ROUND_ROBIN_DAYS = ["Round Robin Day 1","Round Robin Day 2","Round Robin Day 3","Round Robin Day 4","Round Robin Day 5","Round Robin Day 6","Round Robin Day 7","Round Robin Day 8","Round Robin Day 9","Round Robin Day 10"];
+
+async function loadStandings() {
+  const loadingEl = document.getElementById('standingsLoading');
+  const tableEl = document.getElementById('standingsTable');
+  const errorEl = document.getElementById('standingsError');
+  const logEl = document.getElementById('standingsResultsLog');
+
+  loadingEl.style.display = 'block';
+  tableEl.style.display = 'none';
+  errorEl.style.display = 'none';
+  logEl.style.display = 'none';
+
+  try {
+    const res = await fetch('/api/match_results');
+    if (!res.ok) throw new Error('Failed to load');
+    const results = await res.json();
+
+    loadingEl.style.display = 'none';
+
+    if (!results.length) {
+      tableEl.innerHTML = '<div class="no-matches">No results yet.</div>';
+      tableEl.style.display = 'block';
+      return;
+    }
+
+    // Compute stats
+    const stats = {};
+    SCHOOLS.forEach(s => { stats[s] = { school:s, played:0, won:0, lost:0, gamesWon:0, ptsDiff:0, points:0 }; });
+
+    results.forEach(r => {
+      if (!ROUND_ROBIN_DAYS.includes(r.match_day)) return;
+      stats[r.school_a].played += 1;
+      stats[r.school_b].played += 1;
+      stats[r.school_a].points += r.points_a;
+      stats[r.school_b].points += r.points_b;
+      stats[r.school_a].gamesWon += r.games_won_a;
+      stats[r.school_b].gamesWon += r.games_won_b;
+      if (r.points_a > r.points_b) { stats[r.school_a].won += 1; stats[r.school_b].lost += 1; }
+      else if (r.points_b > r.points_a) { stats[r.school_b].won += 1; stats[r.school_a].lost += 1; }
+      const diffA = (r.game1_a + r.game2_a + (r.game3_a||0)) - (r.game1_b + r.game2_b + (r.game3_b||0));
+      stats[r.school_a].ptsDiff += diffA;
+      stats[r.school_b].ptsDiff -= diffA;
+    });
+
+    const sorted = Object.values(stats).sort((x,y) => {
+      if (y.points !== x.points) return y.points - x.points;
+      const h2h = results.find(r => (r.school_a===x.school&&r.school_b===y.school)||(r.school_a===y.school&&r.school_b===x.school));
+      if (h2h && h2h.points_a > h2h.points_b) return h2h.school_a===x.school ? -1 : 1;
+      if (h2h && h2h.points_b > h2h.points_a) return h2h.school_b===x.school ? -1 : 1;
+      if (y.gamesWon !== x.gamesWon) return y.gamesWon - x.gamesWon;
+      if (y.ptsDiff !== x.ptsDiff) return y.ptsDiff - x.ptsDiff;
+      return 0;
+    });
+
+    const cols = ['Rank','School','Played','Won','Lost','Games Won','Pts Diff','Points'];
+    let html = '<table class="standings-table"><thead><tr>';
+    cols.forEach(c => html += '<th>' + c + '</th>');
+    html += '</tr></thead><tbody>';
+    sorted.forEach((s,i) => {
+      const top2 = i < 2;
+      html += '<tr' + (top2 ? ' class="top2"' : '') + '>';
+      html += '<td class="rank">' + (i+1) + '</td>';
+      html += '<td style="text-align:left;"><strong>' + s.school + '</strong></td>';
+      html += '<td>' + s.played + '</td>';
+      html += '<td>' + s.won + '</td>';
+      html += '<td>' + s.lost + '</td>';
+      html += '<td>' + s.gamesWon + '</td>';
+      html += '<td>' + (s.ptsDiff > 0 ? '+' + s.ptsDiff : s.ptsDiff) + '</td>';
+      html += '<td style="font-weight:800;font-size:16px;">' + s.points + '</td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    html += '<p style="margin:0.75rem 0 0;font-size:12px;color:#666;">Top 2 advance to semi-finals. Green left border indicates advancing teams.</p>';
+    tableEl.innerHTML = html;
+    tableEl.style.display = 'block';
+
+    // Match results log
+    let logHtml = '';
+    results.forEach(r => {
+      logHtml += '<div class="match-card">';
+      logHtml += '<div class="match-header">';
+      logHtml += '<div class="schools">' + r.match_day + ' — ' + r.school_a + ' vs ' + r.school_b + '</div>';
+      logHtml += '<div class="score">' + (r.walkover ? 'Walkover' : r.points_a + '–' + r.points_b + ' pts') + '</div>';
+      logHtml += '</div>';
+      logHtml += '<div class="players">Players: ' + r.player_a + ' vs ' + r.player_b + '</div>';
+      if (!r.walkover) {
+        let games = r.game1_a + '–' + r.game1_b + ', ' + r.game2_a + '–' + r.game2_b;
+        if (r.game3_a != null && r.game3_b != null) games += ', ' + r.game3_a + '–' + r.game3_b;
+        logHtml += '<div class="games">Games: ' + games + '</div>';
+      }
+      logHtml += '</div>';
+    });
+    document.getElementById('matchResultsList').innerHTML = logHtml;
+    logEl.style.display = 'block';
+
+  } catch (err) {
+    loadingEl.style.display = 'none';
+    errorEl.textContent = 'Could not load standings. ' + (err.message || '');
+    errorEl.style.display = 'block';
+  }
+}
+
+// Init standings — called when the standings page is shown
+(function() {
+  const origShow = window.showPage;
+  showPage = function(id) {
+    if (id === 'standings') loadStandings();
+    if (origShow) origShow(id);
+  };
+})();
 
 // Init signup list
 renderSignupList();
