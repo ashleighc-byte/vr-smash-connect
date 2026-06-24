@@ -209,6 +209,93 @@ export type Database = {
         }
         Relationships: []
       }
+      tournament_rosters: {
+        Row: {
+          id: string
+          school: string
+          player_slot: string
+          student_name: string
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          school: string
+          player_slot: string
+          student_name: string
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          school?: string
+          player_slot?: string
+          student_name?: string
+          created_at?: string | null
+        }
+        Relationships: []
+      }
+      match_results: {
+        Row: {
+          id: string
+          match_day: string
+          school_a: string
+          school_b: string
+          player_a: string
+          player_b: string
+          game1_a: number
+          game1_b: number
+          game2_a: number
+          game2_b: number
+          game3_a: number | null
+          game3_b: number | null
+          games_won_a: number
+          games_won_b: number
+          points_a: number
+          points_b: number
+          walkover: boolean
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          match_day: string
+          school_a: string
+          school_b: string
+          player_a: string
+          player_b: string
+          game1_a?: number
+          game1_b?: number
+          game2_a?: number
+          game2_b?: number
+          game3_a?: number | null
+          game3_b?: number | null
+          games_won_a?: number
+          games_won_b?: number
+          points_a?: number
+          points_b?: number
+          walkover?: boolean
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          match_day?: string
+          school_a?: string
+          school_b?: string
+          player_a?: string
+          player_b?: string
+          game1_a?: number
+          game1_b?: number
+          game2_a?: number
+          game2_b?: number
+          game3_a?: number | null
+          game3_b?: number | null
+          games_won_a?: number
+          games_won_b?: number
+          points_a?: number
+          points_b?: number
+          walkover?: boolean
+          created_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

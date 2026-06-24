@@ -10,7 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AdminRosterRouteImport } from './routes/admin.roster'
+import { Route as AdminScoresRouteImport } from './routes/admin.scores'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as StandingsRouteImport } from './routes/standings'
 import { Route as ApiSurveyStudentRouteImport } from './routes/api/survey.student'
 import { Route as ApiSurveyStaffRouteImport } from './routes/api/survey.staff'
 
@@ -19,9 +22,24 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRosterRoute = AdminRosterRouteImport.update({
+  id: '/admin/roster',
+  path: '/admin/roster',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminScoresRoute = AdminScoresRouteImport.update({
+  id: '/admin/scores',
+  path: '/admin/scores',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StandingsRoute = StandingsRouteImport.update({
+  id: '/standings',
+  path: '/standings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiSurveyStudentRoute = ApiSurveyStudentRouteImport.update({
@@ -38,12 +56,18 @@ const ApiSurveyStaffRoute = ApiSurveyStaffRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/admin/roster': typeof AdminRosterRoute
+  '/admin/scores': typeof AdminScoresRoute
+  '/standings': typeof StandingsRoute
   '/api/survey/staff': typeof ApiSurveyStaffRoute
   '/api/survey/student': typeof ApiSurveyStudentRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/admin/roster': typeof AdminRosterRoute
+  '/admin/scores': typeof AdminScoresRoute
+  '/standings': typeof StandingsRoute
   '/api/survey/staff': typeof ApiSurveyStaffRoute
   '/api/survey/student': typeof ApiSurveyStudentRoute
 }
@@ -51,20 +75,26 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/admin/roster': typeof AdminRosterRoute
+  '/admin/scores': typeof AdminScoresRoute
+  '/standings': typeof StandingsRoute
   '/api/survey/staff': typeof ApiSurveyStaffRoute
   '/api/survey/student': typeof ApiSurveyStudentRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/api/survey/staff' | '/api/survey/student'
+  fullPaths: '/' | '/admin' | '/admin/roster' | '/admin/scores' | '/standings' | '/api/survey/staff' | '/api/survey/student'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/api/survey/staff' | '/api/survey/student'
-  id: '__root__' | '/' | '/admin' | '/api/survey/staff' | '/api/survey/student'
+  to: '/' | '/admin' | '/admin/roster' | '/admin/scores' | '/standings' | '/api/survey/staff' | '/api/survey/student'
+  id: '__root__' | '/' | '/admin' | '/admin/roster' | '/admin/scores' | '/kek' | '/api/survey/staff' | '/api/survey/student'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  AdminRosterRoute: typeof AdminRosterRoute
+  AdminScoresRoute: typeof AdminScoresRoute
+  StandingsRoute: typeof StandingsRoute
   ApiSurveyStaffRoute: typeof ApiSurveyStaffRoute
   ApiSurveyStudentRoute: typeof ApiSurveyStudentRoute
 }
@@ -78,11 +108,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/roster': {
+      id: '/admin/roster'
+      path: '/admin/roster'
+      fullPath: '/admin/roster'
+      preLoaderRoute: typeof AdminRosterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/scores': {
+      id: '/admin/scores'
+      path: '/admin/scores'
+      fullPath: '/admin/scores'
+      preLoaderRoute: typeof AdminScoresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/standings': {
+      id: '/standings'
+      path: '/standings'
+      fullPath: '/standings'
+      preLoaderRoute: typeof StandingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/survey/student': {
@@ -105,6 +156,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  AdminRosterRoute: AdminRosterRoute,
+  AdminScoresRoute: AdminScoresRoute,
+  StandingsRoute: StandingsRoute,
   ApiSurveyStaffRoute: ApiSurveyStaffRoute,
   ApiSurveyStudentRoute: ApiSurveyStudentRoute,
 }
