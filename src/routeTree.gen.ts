@@ -9,38 +9,75 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiSurveyStudentRouteImport } from './routes/api/survey.student'
+import { Route as ApiSurveyStaffRouteImport } from './routes/api/survey.staff'
 
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSurveyStudentRoute = ApiSurveyStudentRouteImport.update({
+  id: '/api/survey/student',
+  path: '/api/survey/student',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSurveyStaffRoute = ApiSurveyStaffRouteImport.update({
+  id: '/api/survey/staff',
+  path: '/api/survey/staff',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/api/survey/staff': typeof ApiSurveyStaffRoute
+  '/api/survey/student': typeof ApiSurveyStudentRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/api/survey/staff': typeof ApiSurveyStaffRoute
+  '/api/survey/student': typeof ApiSurveyStudentRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/api/survey/staff': typeof ApiSurveyStaffRoute
+  '/api/survey/student': typeof ApiSurveyStudentRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/admin' | '/api/survey/staff' | '/api/survey/student'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/admin' | '/api/survey/staff' | '/api/survey/student'
+  id: '__root__' | '/' | '/admin' | '/api/survey/staff' | '/api/survey/student'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  ApiSurveyStaffRoute: typeof ApiSurveyStaffRoute
+  ApiSurveyStudentRoute: typeof ApiSurveyStudentRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +85,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/survey/student': {
+      id: '/api/survey/student'
+      path: '/api/survey/student'
+      fullPath: '/api/survey/student'
+      preLoaderRoute: typeof ApiSurveyStudentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/survey/staff': {
+      id: '/api/survey/staff'
+      path: '/api/survey/staff'
+      fullPath: '/api/survey/staff'
+      preLoaderRoute: typeof ApiSurveyStaffRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  ApiSurveyStaffRoute: ApiSurveyStaffRoute,
+  ApiSurveyStudentRoute: ApiSurveyStudentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
