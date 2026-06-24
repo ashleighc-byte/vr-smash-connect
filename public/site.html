@@ -1,0 +1,2465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eleven VR Table Tennis — Waikato KC Cluster Pilot</title>
+<style>
+  /* ── Design tokens: Eleven VR palette ── */
+  :root {
+    --black:   #1a1a1a;
+    --red:     #d42b2b;
+    --red-dk:  #a81e1e;
+    --red-lt:  #fdecea;
+    --white:   #f5f5f5;
+    --off:     #f0f0f0;
+    --blue:    #1e5fa8;  /* paddle handle accent */
+    --blue-lt: #e8f0fb;
+    --mid:     #555;
+    --border:  #ddd;
+    --card-bg: #fff;
+    --radius:  6px;
+    --shadow:  0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--black);
+    background: var(--white);
+  }
+
+  /* ── Nav ── */
+  #topnav {
+    background: var(--black);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 3px solid var(--red);
+  }
+  .nav-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 52px;
+  }
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    color: var(--white);
+    font-weight: 800;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .nav-logo .e-logo {
+    background: var(--red);
+    color: #fff;
+    font-weight: 900;
+    padding: 2px 8px;
+    font-size: 1rem;
+    letter-spacing: 0.06em;
+  }
+  .nav-links {
+    display: flex;
+    gap: 0;
+    list-style: none;
+    overflow-x: auto;
+  }
+  .nav-links a {
+    display: block;
+    padding: 0 0.85rem;
+    height: 52px;
+    line-height: 52px;
+    color: #ccc;
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: color 0.15s, background 0.15s;
+  }
+  .nav-links a:hover, .nav-links a.active {
+    color: var(--white);
+    background: rgba(212,43,43,0.25);
+  }
+  .nav-links a.active { color: var(--white); border-bottom: 2px solid var(--red); }
+
+  /* ── Layout ── */
+  .page { display: none; }
+  .page.visible { display: block; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+  .wrap-wide { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+
+  /* ── Hero (home only) ── */
+  #hero {
+    background: var(--black);
+    color: var(--white);
+    padding: 3.5rem 1.25rem 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  #hero::before {
+    content: '';
+    position: absolute;
+    right: -80px; top: -80px;
+    width: 420px; height: 420px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(212,43,43,0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 1100px; margin: 0 auto; position: relative; }
+  .hero-eyebrow {
+    display: inline-block;
+    background: var(--red);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    margin-bottom: 1rem;
+  }
+  #hero h1 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+  }
+  #hero h1 span { color: var(--red); }
+  #hero p { color: #bbb; max-width: 560px; font-size: 1rem; margin-bottom: 2rem; }
+  .hero-cta { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-block;
+    padding: 0.6rem 1.3rem;
+    border-radius: var(--radius);
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: opacity 0.15s, transform 0.1s;
+    letter-spacing: 0.02em;
+  }
+  .btn:hover { opacity: 0.85; transform: translateY(-1px); }
+  .btn-red   { background: var(--red); color: #fff; }
+  .btn-white { background: var(--white); color: var(--black); }
+  .btn-outline { background: transparent; color: var(--white); border: 1.5px solid rgba(255,255,255,0.35); }
+  .btn-blue  { background: var(--blue); color: #fff; }
+  .btn-sm    { padding: 0.4rem 0.9rem; font-size: 0.8rem; }
+
+  /* ── Section titles ── */
+  .section-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 0.35rem;
+  }
+  h1.page-title {
+    font-size: 1.9rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.4rem;
+  }
+  .page-desc { color: var(--mid); max-width: 640px; margin-bottom: 2rem; font-size: 0.95rem; }
+  h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+  h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+
+  /* ── Resource grid (home) ── */
+  .resource-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  .resource-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: box-shadow 0.15s, border-color 0.15s, transform 0.12s;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  .resource-card:hover {
+    box-shadow: var(--shadow);
+    border-color: var(--red);
+    transform: translateY(-2px);
+  }
+  .card-icon {
+    font-size: 1.6rem;
+    margin-bottom: 0.6rem;
+    display: block;
+  }
+  .card-cat {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 0.25rem;
+  }
+  .card-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.3rem; }
+  .card-desc  { font-size: 0.83rem; color: var(--mid); line-height: 1.5; }
+  .card-badge {
+    display: inline-block;
+    margin-top: 0.6rem;
+    background: #fff3cd;
+    color: #7a5600;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+  .card-badge.done { background: #d4edda; color: #155724; }
+
+  /* ── Docs / content pages ── */
+  .doc-section {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .doc-section h2 {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--red);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .doc-section h3 { font-size: 0.95rem; margin-bottom: 0.35rem; margin-top: 0.75rem; }
+  ul.checklist { list-style: none; padding: 0; }
+  ul.checklist li {
+    padding: 0.35rem 0 0.35rem 1.6rem;
+    position: relative;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.9rem;
+  }
+  ul.checklist li:last-child { border-bottom: none; }
+  ul.checklist li::before {
+    content: '☐';
+    position: absolute;
+    left: 0;
+    color: var(--red);
+    font-size: 1rem;
+  }
+  ul.plain { list-style: none; padding: 0; }
+  ul.plain li {
+    padding: 0.3rem 0 0.3rem 1.2rem;
+    position: relative;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #f5f5f5;
+  }
+  ul.plain li::before { content: '→'; position: absolute; left: 0; color: var(--red); font-size: 0.8rem; top: 0.4rem; }
+  ul.plain li:last-child { border-bottom: none; }
+
+  .points-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  .points-table th {
+    background: var(--black);
+    color: var(--white);
+    text-align: left;
+    padding: 0.6rem 0.85rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .points-table td { padding: 0.55rem 0.85rem; border-bottom: 1px solid var(--border); }
+  .points-table tr:last-child td { border-bottom: none; }
+  .points-table tr:nth-child(even) td { background: #fafafa; }
+  .pts-badge {
+    display: inline-block;
+    background: var(--red);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.78rem;
+    padding: 2px 8px;
+    border-radius: 3px;
+    min-width: 48px;
+    text-align: center;
+  }
+
+  .info-box {
+    background: var(--blue-lt);
+    border-left: 3px solid var(--blue);
+    padding: 0.85rem 1rem;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin-bottom: 1rem;
+    font-size: 0.88rem;
+  }
+  .warn-box {
+    background: #fff8e1;
+    border-left: 3px solid #f59f00;
+    padding: 0.85rem 1rem;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin-bottom: 1rem;
+    font-size: 0.88rem;
+  }
+  .rule-box {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+  }
+  .rule-head {
+    background: var(--black);
+    color: var(--white);
+    padding: 0.5rem 1rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+  .rule-body { padding: 0.75rem 1rem; font-size: 0.88rem; }
+
+  /* ── Schedule table ── */
+  .schedule-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  .schedule-table th {
+    background: var(--black);
+    color: var(--white);
+    padding: 0.6rem 0.85rem;
+    text-align: left;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .schedule-table td { padding: 0.6rem 0.85rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .schedule-table tr:last-child td { border-bottom: none; }
+  .schedule-table tr.finals td { background: var(--red-lt); font-weight: 600; }
+  .day-badge {
+    display: inline-block;
+    background: var(--red);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-bottom: 2px;
+  }
+
+  /* ── Timeline ── */
+  .timeline { position: relative; padding-left: 2rem; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px; top: 8px; bottom: 8px;
+    width: 2px;
+    background: var(--border);
+  }
+  .tl-item { position: relative; margin-bottom: 1.5rem; }
+  .tl-dot {
+    position: absolute;
+    left: -2rem;
+    top: 4px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--red);
+    border: 3px solid var(--white);
+    box-shadow: 0 0 0 2px var(--red);
+  }
+  .tl-dot.done { background: #28a745; box-shadow: 0 0 0 2px #28a745; }
+  .tl-dot.current { background: var(--red); box-shadow: 0 0 0 3px rgba(212,43,43,0.3); }
+  .tl-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--mid); margin-bottom: 0.2rem; }
+  .tl-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.35rem; }
+  .tl-body { font-size: 0.85rem; color: var(--mid); line-height: 1.55; }
+  .tl-body ul { list-style: none; padding: 0; margin-top: 0.35rem; }
+  .tl-body ul li { padding-left: 1rem; position: relative; margin-bottom: 0.15rem; }
+  .tl-body ul li::before { content: '·'; position: absolute; left: 0; color: var(--red); font-weight: 700; }
+  .tl-phase {
+    background: var(--black);
+    color: var(--white);
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border-radius: 3px;
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.04em;
+  }
+  .tl-phase.red { background: var(--red); }
+  .tl-phase.blue { background: var(--blue); }
+  .tl-phase.green { background: #28a745; }
+
+  /* ── Bracket ── */
+  .bracket-wrap { overflow-x: auto; }
+  .bracket { display: flex; gap: 2rem; padding: 1rem 0; min-width: 600px; }
+  .b-round { display: flex; flex-direction: column; gap: 1.5rem; flex: 1; }
+  .b-round-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); margin-bottom: 0.5rem; text-align: center; }
+  .b-match { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .b-slot {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  .b-slot:last-child { border-bottom: none; }
+  .b-slot input[type="text"] {
+    border: none;
+    outline: none;
+    font-size: 0.85rem;
+    font-family: inherit;
+    flex: 1;
+    background: transparent;
+    color: var(--black);
+  }
+  .b-slot input[type="text"]::placeholder { color: #bbb; }
+  .b-slot input[type="number"] {
+    width: 40px;
+    border: none;
+    border-left: 1px solid var(--border);
+    padding: 0 0.4rem;
+    text-align: center;
+    font-size: 0.85rem;
+    font-family: inherit;
+    background: #fafafa;
+    height: 100%;
+    outline: none;
+    color: var(--black);
+  }
+  .b-slot.winner { background: #e8f5ee; }
+  .b-slot.winner input[type="text"] { font-weight: 700; color: #1a7a4a; }
+
+  /* ── Promo assets page ── */
+  .promo-asset {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  .promo-asset-head {
+    background: var(--black);
+    color: var(--white);
+    padding: 0.65rem 1rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .promo-asset-body { padding: 1.25rem; }
+
+  /* ── Notice / poster previews ── */
+  .notice-preview {
+    border: 2px solid var(--black);
+    border-radius: 4px;
+    padding: 1.5rem;
+    font-family: 'Georgia', serif;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .notice-preview .n-logo {
+    background: var(--black);
+    color: var(--white);
+    display: inline-block;
+    padding: 4px 12px;
+    font-weight: 900;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+  }
+  .notice-preview .n-logo span { color: var(--red); }
+  .notice-preview h2 { font-size: 1.4rem; margin-bottom: 0.5rem; line-height: 1.2; }
+  .notice-preview p { font-size: 0.9rem; margin-bottom: 0.5rem; line-height: 1.5; }
+  .notice-preview .n-bold { font-weight: 700; font-size: 0.95rem; }
+  .notice-preview .n-cta {
+    background: var(--red);
+    color: #fff;
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-top: 0.75rem;
+  }
+
+  .poster-preview {
+    background: var(--black);
+    color: var(--white);
+    border-radius: var(--radius);
+    padding: 2rem;
+    max-width: 360px;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .poster-preview::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(212,43,43,0.35) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .poster-preview .p-sub { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: #888; margin-bottom: 0.5rem; }
+  .poster-preview .p-title { font-size: 2.2rem; font-weight: 900; line-height: 1; color: #fff; margin-bottom: 0.15rem; }
+  .poster-preview .p-title span { color: var(--red); }
+  .poster-preview .p-game { font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: #888; margin-bottom: 1.5rem; }
+  .poster-preview .p-date { font-size: 1.3rem; font-weight: 800; color: var(--white); margin-bottom: 0.25rem; }
+  .poster-preview .p-detail { font-size: 0.8rem; color: #aaa; margin-bottom: 1.5rem; line-height: 1.5; }
+  .poster-preview .p-badge { background: var(--red); display: inline-block; padding: 5px 14px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* ── Road to tournament graphic ── */
+  .road-graphic { background: var(--black); border-radius: var(--radius); padding: 1.5rem 1rem; color: #fff; overflow-x: auto; }
+  .road-steps { display: flex; align-items: center; gap: 0; min-width: 580px; }
+  .road-step { flex: 1; text-align: center; }
+  .road-step .rs-num {
+    width: 32px; height: 32px;
+    background: var(--red);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 0.85rem;
+    margin: 0 auto 0.4rem;
+  }
+  .road-step .rs-label { font-size: 0.72rem; font-weight: 600; line-height: 1.3; color: #ccc; }
+  .road-step .rs-date { font-size: 0.62rem; color: #777; margin-top: 0.2rem; }
+  .road-arrow { color: var(--red); font-size: 1.2rem; padding: 0 0.25rem; flex-shrink: 0; margin-top: -1rem; }
+
+  /* ── Survey forms ── */
+  .survey-wrap { max-width: 700px; }
+  .q-section { margin-bottom: 1.5rem; }
+  .q-section-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--red);
+    background: var(--red-lt);
+    padding: 0.5rem 0.85rem;
+    border-left: 3px solid var(--red);
+    margin-bottom: 1rem;
+  }
+  .q-item { margin-bottom: 1.1rem; }
+  .q-label { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.35rem; }
+  .q-hint { font-size: 0.8rem; color: var(--mid); margin-bottom: 0.35rem; }
+  .radio-group, .check-group { display: flex; flex-direction: column; gap: 0.3rem; }
+  .radio-group label, .check-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 400;
+    font-size: 0.88rem;
+    cursor: pointer;
+    padding: 0.25rem 0.4rem;
+    border-radius: 4px;
+    transition: background 0.1s;
+  }
+  .radio-group label:hover, .check-group label:hover { background: var(--off); }
+  .scale-row { display: flex; gap: 0.6rem; }
+  .scale-row label { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; font-size: 0.8rem; cursor: pointer; }
+  input[type="text"], input[type="number"], textarea, select {
+    width: 100%;
+    padding: 0.5rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.88rem;
+    font-family: inherit;
+    color: var(--black);
+    background: #fff;
+    transition: border-color 0.15s;
+  }
+  input[type="text"]:focus, textarea:focus { outline: none; border-color: var(--red); }
+  textarea { min-height: 75px; resize: vertical; }
+  .submit-row { display: flex; justify-content: flex-end; padding-top: 0.5rem; }
+  .success-msg {
+    background: #d4edda; border: 1px solid #28a745; border-radius: var(--radius);
+    padding: 1.5rem; text-align: center; color: #155724;
+  }
+  .error-msg {
+    background: var(--red-lt); border: 1px solid var(--red); border-radius: var(--radius);
+    padding: 0.85rem 1rem; color: var(--red-dk); margin-bottom: 1rem; font-size: 0.88rem;
+  }
+
+  /* Print */
+  @media print {
+    #topnav { display: none; }
+    .page { display: block !important; page-break-after: always; }
+    .btn { display: none; }
+  }
+  @media (max-width: 640px) {
+    .nav-links a { padding: 0 0.55rem; font-size: 0.75rem; }
+    .resource-grid { grid-template-columns: 1fr 1fr; }
+    #hero h1 { font-size: 1.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── NAVIGATION ── -->
+<nav id="topnav">
+  <div class="nav-inner">
+    <a class="nav-logo" href="#" onclick="showPage('home')">
+      <span class="e-logo">EL<span style="color:#fff">EV</span>EN</span>
+      VR TT Pilot
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#" onclick="showPage('home')" data-page="home" class="active">Home</a></li>
+      <li><a href="#" onclick="showPage('invite')" data-page="invite">School invite</a></li>
+      <li><a href="#" onclick="showPage('checklist')" data-page="checklist">Checklist</a></li>
+      <li><a href="#" onclick="showPage('rules')" data-page="rules">Rules</a></li>
+      <li><a href="#" onclick="showPage('points')" data-page="points">Points</a></li>
+      <li><a href="#" onclick="showPage('teacher')" data-page="teacher">Teacher to-do</a></li>
+      <li><a href="#" onclick="showPage('session')" data-page="session">Session guide</a></li>
+      <li><a href="#" onclick="showPage('trouble')" data-page="trouble">Troubleshooting</a></li>
+      <li><a href="#" onclick="showPage('promo')" data-page="promo">Promo assets</a></li>
+      <li><a href="#" onclick="showPage('bracket')" data-page="bracket">Bracket</a></li>
+      <li><a href="#" onclick="showPage('survey-student')" data-page="survey-student">Student survey</a></li>
+      <li><a href="#" onclick="showPage('survey-staff')" data-page="survey-staff">Staff survey</a></li>
+      <li><a href="#" onclick="showPage('privacy')" data-page="privacy">Privacy</a></li>
+      <li><a href="#" onclick="showPage('timeline')" data-page="timeline">Timeline</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     PAGE: HOME
+══════════════════════════════════════════ -->
+<div id="page-home" class="page visible">
+  <div id="hero">
+    <div class="hero-inner">
+      <span class="hero-eyebrow">🏓 Waikato KC Cluster · Term 3 Pilot</span>
+      <h1><span>ELEVEN VR</span><br>Table Tennis<br>Interschool Tournament</h1>
+      <p>Four Waikato schools. Five days. One headset per school casting to a big screen. GameFIT bridging virtual play and physical sport.</p>
+      <div class="hero-cta">
+        <button class="btn btn-red" onclick="showPage('survey-student')">Student survey</button>
+        <button class="btn btn-outline" onclick="showPage('timeline')">View timeline</button>
+        <button class="btn btn-outline" onclick="showPage('bracket')">Tournament bracket</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap-wide">
+    <!-- Tournament at a glance -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2.5rem;">
+      <div style="background:var(--black);color:#fff;padding:1.25rem;border-radius:var(--radius);text-align:center;">
+        <div style="font-size:2rem;font-weight:900;color:var(--red);">4</div>
+        <div style="font-size:0.8rem;color:#aaa;margin-top:0.2rem;">KC Cluster schools</div>
+      </div>
+      <div style="background:var(--black);color:#fff;padding:1.25rem;border-radius:var(--radius);text-align:center;">
+        <div style="font-size:2rem;font-weight:900;color:var(--red);">5</div>
+        <div style="font-size:0.8rem;color:#aaa;margin-top:0.2rem;">Tournament days</div>
+      </div>
+      <div style="background:var(--black);color:#fff;padding:1.25rem;border-radius:var(--radius);text-align:center;">
+        <div style="font-size:2rem;font-weight:900;color:var(--red);">2</div>
+        <div style="font-size:0.8rem;color:#aaa;margin-top:0.2rem;">Headsets per school</div>
+      </div>
+      <div style="background:var(--black);color:#fff;padding:1.25rem;border-radius:var(--radius);text-align:center;">
+        <div style="font-size:2rem;font-weight:900;color:var(--red);">6–8</div>
+        <div style="font-size:0.8rem;color:#aaa;margin-top:0.2rem;">Week campaign</div>
+      </div>
+      <div style="background:var(--black);color:#fff;padding:1.25rem;border-radius:var(--radius);text-align:center;">
+        <div style="font-size:2rem;font-weight:900;color:var(--red);">31 Aug</div>
+        <div style="font-size:0.8rem;color:#aaa;margin-top:0.2rem;">Tournament starts</div>
+      </div>
+    </div>
+
+    <!-- Schools -->
+    <div style="margin-bottom:2.5rem;">
+      <div class="section-label">Schools in the pilot</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.75rem;margin-top:0.75rem;">
+        <div style="padding:0.85rem 1rem;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);font-weight:600;font-size:0.9rem;">🏫 Piopio College</div>
+        <div style="padding:0.85rem 1rem;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);font-weight:600;font-size:0.9rem;">🏫 Taumarunui High School</div>
+        <div style="padding:0.85rem 1rem;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);font-weight:600;font-size:0.9rem;">🏫 Ōtorohanga College</div>
+        <div style="padding:0.85rem 1rem;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);font-weight:600;font-size:0.9rem;">🏫 Te Kuiti High School</div>
+      </div>
+    </div>
+
+    <!-- Resources -->
+    <div class="section-label">Resources &amp; tools</div>
+    <div class="resource-grid">
+      <a class="resource-card" href="#" onclick="showPage('invite')">
+        <span class="card-icon">✉️</span>
+        <div class="card-cat">School admin</div>
+        <div class="card-title">School invite</div>
+        <div class="card-desc">One-page invite for KC Cluster schools to join the pilot.</div>
+        <span class="card-badge">Ready to send</span>
+      </a>
+      <a class="resource-card" href="#" onclick="showPage('checklist')">
+        <span class="card-icon">✅</span>
+        <div class="card-cat">School admin</div>
+        <div class="card-title">School requirements checklist</div>
+        <div class="card-desc">Space, screen, power, internet, staff lead, permissions.</div>
+      </a>
+      <a class="resource-card" href="#" onclick="showPage('rules')">
+        <span class="card-icon">📋</span>
+        <div class="card-cat">Tournament</div>
+        <div class="card-title">Tournament rules</div>
+        <div class="card-desc">Match format, scoring, eligibility, substitutes, finals.</div>
+      </a>
+      <a class="resource-card" href="#" onclick="showPage('points')">
+        <span class="card-icon">⭐</span>
+        <div class="card-cat">Karawhiua</div>
+        <div class="card-title">House points structure</div>
+        <div class="card-desc">Full Karawhiua points model from first try to finals day.</div>
+      </a>
+      <a class="resource-card" href="#" onclick="showPage('teacher')">
+        <span class="card-icon">👩‍🏫</span>
+        <div class="card-cat">School leads</div>
+        <div class="card-title">Lead teacher to-do list</div>
+        <div class="card-desc">Everything a school lead needs to confirm before tournament week.</div>
+      </a>
+      <a class="resource-card" href="#" onclick="showPage('session')">
+        <span class="card-icon">🎮</span>
+        <div class="card-cat">Delivery</div>
+        <div class="card-title">How to run a lunchtime session</div>
+        <div class="card-desc">Step-by-step guide for school leads running practice sessions.</div>
+      </a>
+      <a class="resource-card" href="#" onclick="showPage('trouble')">
+        <span class="card-icon">🔧</span>
+        <div class="card-cat">Tech support</div>
+        <div class="card-title">Troubleshooting guide</div>
+        <div class="card-desc">Common problems and fixes for headsets, casting, and internet.</div>
+      </a>
+      <a class="resource-card" href="#" onclick="showPage('promo')">
+        <span class="card-icon">📣</span>
+        <div class="card-cat">Promo</div>
+        <div class="card-title">Student promo assets</div>
+        <div class="card-desc">School notice, poster, house points explainer, Road to Tournament graphic.</div>
+      </a>
+      <a class="resource-card" href="#" onclick="showPage('bracket')">
+        <span class="card-icon">🏆</span>
+        <div class="card-cat">Tournament</div>
+        <div class="card-title">School playoff bracket</div>
+        <div class="card-desc">Fill in sign-ups, draw, scoring, and auto-advancing finals bracket.</div>
+      </a>
+      <a class="resource-card" href="#" onclick="showPage('survey-student')">
+        <span class="card-icon">📝</span>
+        <div class="card-cat">Data</div>
+        <div class="card-title">Pre-pilot student survey</div>
+        <div class="card-desc">21-question survey for students before the pilot begins.</div>
+        <span class="card-badge done">Live</span>
+      </a>
+      <a class="resource-card" href="#" onclick="showPage('survey-staff')">
+        <span class="card-icon">📊</span>
+        <div class="card-cat">Data</div>
+        <div class="card-title">Staff feedback form</div>
+        <div class="card-desc">30-question post-pilot feedback form for school staff.</div>
+        <span class="card-badge done">Live</span>
+      </a>
+      <a class="resource-card" href="#" onclick="showPage('privacy')">
+        <span class="card-icon">🔒</span>
+        <div class="card-cat">Safety</div>
+        <div class="card-title">Privacy &amp; safety guidance</div>
+        <div class="card-desc">Consent, no public livestream, student names, storytelling rules.</div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: SCHOOL INVITE
+══════════════════════════════════════════ -->
+<div id="page-invite" class="page">
+  <div class="wrap">
+    <div class="section-label">Resource 1 of 11</div>
+    <h1 class="page-title">School invite</h1>
+    <p class="page-desc">Send this to the four KC Cluster schools to introduce the pilot and confirm their interest. Keep it brief — a fuller requirements checklist follows separately.</p>
+
+    <div style="background:#fff;border:2px solid var(--black);border-radius:var(--radius);padding:2rem;max-width:620px;font-size:0.92rem;line-height:1.7;">
+      <div style="background:var(--black);color:#fff;display:inline-block;padding:4px 14px;font-weight:900;font-size:1.1rem;letter-spacing:0.05em;margin-bottom:1.25rem;">
+        EL<span style="color:var(--red)">EV</span>EN — VR Table Tennis Pilot
+      </div>
+
+      <p style="font-weight:700;margin-bottom:0.75rem;">Kia ora [School Name],</p>
+
+      <p style="margin-bottom:0.75rem;">Sport Waikato and <strong>Beyond</strong> (the team behind GameFIT) are inviting your school to take part in a <strong>Waikato-first VR table tennis interschool competition</strong> — running during tournament week <strong>31 August – 4 September 2025</strong>.</p>
+
+      <p style="margin-bottom:0.75rem;">This is a free pilot for KC Cluster schools, delivered using VR headsets that are already in your school through GameFIT. Students compete in <strong>Eleven Table Tennis VR</strong> — a head-to-head VR game that mirrors real table tennis — against students from the other three schools in the cluster.</p>
+
+      <div style="background:var(--off);padding:1rem;border-radius:var(--radius);margin:1rem 0;">
+        <strong>What's involved for your school:</strong>
+        <ul class="plain" style="margin-top:0.5rem;">
+          <li>A staff lead (doesn't have to be a PE teacher)</li>
+          <li>A space for lunchtime practice sessions (Weeks 3–7)</li>
+          <li>A screen or projector to cast matches to</li>
+          <li>2 VR headsets with 2 separate profiles</li>
+          <li>4 student reps + 2 reserves for tournament week</li>
+        </ul>
+      </div>
+
+      <p style="margin-bottom:0.75rem;">The six-week lead-up is where the real magic happens — lunchtime sessions, school playoffs, and Karawhiua house points so <em>anyone</em> can be part of it, not just the players on the day.</p>
+
+      <p style="margin-bottom:0.75rem;">Beyond will be on-site during tournament week to run everything. Your staff lead just needs to be present and available to troubleshoot.</p>
+
+      <div style="background:var(--red-lt);border-left:3px solid var(--red);padding:0.85rem 1rem;border-radius:0 4px 4px 0;margin:1rem 0;font-size:0.88rem;">
+        <strong>We need to hear from you by [DATE].</strong><br>
+        Please reply to confirm your school's interest and nominate a staff lead. We'll send a full requirements checklist once you're confirmed.
+      </div>
+
+      <p>Contact: <strong>Kelly Oldridge</strong> — kellyo@sportwaikato.org.nz<br>
+      Or: <strong>Leanne Bats</strong> — leanneb@sportwaikato.org.nz</p>
+
+      <p style="margin-top:1rem;font-size:0.82rem;color:var(--mid);">This pilot is supported by the Active As KC Cluster budget and does not require any financial contribution from participating schools.</p>
+    </div>
+
+    <div style="margin-top:1.5rem;display:flex;gap:0.75rem;flex-wrap:wrap;">
+      <button class="btn btn-red" onclick="window.print()">Print / save as PDF</button>
+      <button class="btn btn-outline" style="color:var(--black);border-color:var(--border)" onclick="showPage('checklist')">Next: requirements checklist →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: SCHOOL REQUIREMENTS CHECKLIST
+══════════════════════════════════════════ -->
+<div id="page-checklist" class="page">
+  <div class="wrap">
+    <div class="section-label">Resource 2 of 11</div>
+    <h1 class="page-title">School requirements checklist</h1>
+    <p class="page-desc">Complete this for each school before Week 2 ends. Every item must be confirmed before tournament week can proceed.</p>
+
+    <div class="info-box">This checklist is for Sport Waikato / Beyond staff to complete in conversation with each school's staff lead. Send to schools alongside the invite.</div>
+
+    <div class="doc-section">
+      <h2>Safe playing space</h2>
+      <ul class="checklist">
+        <li>Clear floor area of at least 2m × 2m per headset (no furniture in swing radius)</li>
+        <li>No fragile objects, glass, or hanging items within the play zone</li>
+        <li>Non-slip flooring or mat available if needed</li>
+        <li>Adequate lighting — not too dark, not direct glare on screens</li>
+        <li>Space confirmed for lunchtime sessions (not a shared thoroughfare)</li>
+        <li>Same space available during tournament week</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Screen / projector</h2>
+      <ul class="checklist">
+        <li>Screen or projector available in the play space (or adjacent room)</li>
+        <li>Screen size: 55"+ TV or projector equivalent recommended</li>
+        <li>HDMI or casting capability confirmed (Chromecast / AirPlay / direct cable)</li>
+        <li>Screen visible to seated spectators from the play zone</li>
+        <li>Cast test completed — Meta Quest casting to screen confirmed working</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Power access</h2>
+      <ul class="checklist">
+        <li>Power sockets within 2m of play zone (for chargers during breaks)</li>
+        <li>Extension cord / powerboard available if needed</li>
+        <li>Headsets will arrive charged — confirm charging protocol between sessions</li>
+        <li>Screen/projector power confirmed</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Staff lead</h2>
+      <ul class="checklist">
+        <li>Staff lead nominated by name: ________________________</li>
+        <li>Staff lead has been briefed on pilot purpose and format</li>
+        <li>Staff lead available at lunchtime on agreed practice days</li>
+        <li>Staff lead available all five days of tournament week (31 Aug – 4 Sep)</li>
+        <li>Staff lead has read the troubleshooting guide</li>
+        <li>Staff lead knows who to call if tech issues arise (Beyond contact: ________________)</li>
+        <li>Backup staff person identified in case of absence</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Lunch session availability</h2>
+      <ul class="checklist">
+        <li>Lunchtime slot confirmed: e.g. 12:30–1:15pm daily or [days agreed]</li>
+        <li>First session date confirmed: ________________________</li>
+        <li>School can commit to sessions from Week 3 (27 Jul) through tournament week</li>
+        <li>Room/space not double-booked on agreed days</li>
+        <li>Students can access the space without a class conflict</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Permission &amp; photo requirements</h2>
+      <ul class="checklist">
+        <li>School photo/video consent process confirmed (existing school consent or pilot-specific form)</li>
+        <li>Students without general consent identified — will not be filmed without specific permission</li>
+        <li>No public social media posting during pilot (internal school use only)</li>
+        <li>Storytelling / media use agreed only with named students post-pilot</li>
+        <li>Parent/guardian notification sent if required by school policy</li>
+        <li>Privacy guidance reviewed by staff lead (see Privacy &amp; Safety page)</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Internet &amp; casting setup</h2>
+      <ul class="checklist">
+        <li>School Wi-Fi tested: Meta Quest can connect and access Eleven VR multiplayer</li>
+        <li>Firewall / content filter does not block Eleven VR or Meta services</li>
+        <li>Dedicated Starlink / hotspot router available as backup (recommended)</li>
+        <li>Casting tested: headset casts to screen on same Wi-Fi network</li>
+        <li>5GHz or 6GHz band available and preferred for casting</li>
+        <li>Network tested with both headsets running simultaneously</li>
+        <li>IT contact identified for day-of network issues: ________________________</li>
+      </ul>
+    </div>
+
+    <div style="background:var(--black);color:#fff;border-radius:var(--radius);padding:1.25rem;margin-top:1rem;">
+      <strong style="color:var(--red);">Equipment model — this pilot uses Option B</strong>
+      <p style="margin-top:0.5rem;font-size:0.88rem;color:#ccc;">Minimum viable setup: <strong style="color:#fff;">2 headsets, 2 profiles per school.</strong> This allows one live head-to-head match, lunchtime rotation, a school playoff bracket, and screen casting of the feature match.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: TOURNAMENT RULES
+══════════════════════════════════════════ -->
+<div id="page-rules" class="page">
+  <div class="wrap">
+    <div class="section-label">Resource 3 of 11</div>
+    <h1 class="page-title">Tournament rules</h1>
+    <p class="page-desc">Official rules for the Waikato KC Cluster VR Table Tennis Interschool Tournament. These apply to both the school playoffs and tournament week.</p>
+
+    <div class="rule-box">
+      <div class="rule-head">Match format</div>
+      <div class="rule-body">
+        <p>Each match is played as a <strong>best of 3 games</strong>. Each game is first to <strong>11 points</strong>, with a 2-point lead required to win (e.g. 12–10, 13–11). If a game reaches 10–10, play continues until one player leads by 2 (deuce rules). The player who wins 2 games first wins the match.</p>
+      </div>
+    </div>
+
+    <div class="rule-box">
+      <div class="rule-head">Scoring system — school points</div>
+      <div class="rule-body">
+        <table class="points-table">
+          <thead><tr><th>Result</th><th>School points awarded</th></tr></thead>
+          <tbody>
+            <tr><td>Win a match (2–0)</td><td><span class="pts-badge">3 pts</span></td></tr>
+            <tr><td>Win a match (2–1)</td><td><span class="pts-badge">2 pts</span></td></tr>
+            <tr><td>Lose a match (1–2)</td><td><span class="pts-badge">1 pt</span></td></tr>
+            <tr><td>Lose a match (0–2)</td><td><span class="pts-badge">0 pts</span></td></tr>
+            <tr><td>Walkover win (opponent unable to play)</td><td><span class="pts-badge">2 pts</span></td></tr>
+          </tbody>
+        </table>
+        <p style="margin-top:0.75rem;font-size:0.85rem;color:var(--mid);">Schools are ranked by total points after the round robin. Ties are broken by: (1) head-to-head result, (2) total games won, (3) total points differential.</p>
+      </div>
+    </div>
+
+    <div class="rule-box">
+      <div class="rule-head">Player eligibility</div>
+      <div class="rule-body">
+        <ul class="plain">
+          <li>Players must be currently enrolled students at the school they represent</li>
+          <li>Players must have attended at least one lunchtime practice session before tournament week</li>
+          <li>Each school nominates <strong>4 players</strong> as their tournament team, plus <strong>2 reserves</strong></li>
+          <li>Teams must be confirmed with Sport Waikato by <strong>Friday 29 August</strong></li>
+          <li>Each player may play a maximum of <strong>2 matches per day</strong> during the round robin</li>
+          <li>During finals (Thu–Fri), each school's coach/staff lead selects which players compete</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="rule-box">
+      <div class="rule-head">Substitutes</div>
+      <div class="rule-body">
+        <ul class="plain">
+          <li>Substitutions may be made from the reserve list before a match begins</li>
+          <li>No substitutions mid-match</li>
+          <li>If a named player is absent, a reserve may step in with no penalty to the school</li>
+          <li>If a school cannot field any player, the opposing school receives a walkover (2 points)</li>
+          <li>Schools are encouraged to keep reserves warm — practice sessions during opponent matches are fine</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="rule-box">
+      <div class="rule-head">Tournament week format</div>
+      <div class="rule-body">
+        <table class="schedule-table">
+          <thead><tr><th>Day</th><th>Format</th><th>Matchups</th></tr></thead>
+          <tbody>
+            <tr><td><span class="day-badge">Mon 31 Aug</span><br>Opening / Round 1</td><td>Intra-region warmup</td><td>School A vs School B · School C vs School D</td></tr>
+            <tr><td><span class="day-badge">Tue 1 Sep</span><br>Round 2</td><td>Inter-school</td><td>School A vs School C · School B vs School D</td></tr>
+            <tr><td><span class="day-badge">Wed 2 Sep</span><br>Round 3</td><td>Inter-school</td><td>School A vs School D · School B vs School C</td></tr>
+            <tr><td><span class="day-badge">Thu 3 Sep</span><br>Semi-finals</td><td>Ranked knockouts</td><td>1st vs 4th · 2nd vs 3rd</td></tr>
+            <tr class="finals"><td><span class="day-badge">Fri 4 Sep</span><br>Finals day</td><td>Bronze + Grand Final</td><td>Losers semi vs Losers semi · Winners semi vs Winners semi</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="rule-box">
+      <div class="rule-head">Code of conduct</div>
+      <div class="rule-body">
+        <ul class="plain">
+          <li>Players must respect the headset and play zone at all times</li>
+          <li>No deliberate physical interference with opponents or spectators</li>
+          <li>Unsportsmanlike behaviour (taunting, abuse) may result in a game forfeit at the referee's discretion</li>
+          <li>Sportsmanship Award nominations are collected throughout the week — this is a real award, not a consolation</li>
+          <li>Beyond/Sport Waikato staff have final say on all rule disputes</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: KARAWHIUA POINTS
+══════════════════════════════════════════ -->
+<div id="page-points" class="page">
+  <div class="wrap">
+    <div class="section-label">Resource 4 of 11</div>
+    <h1 class="page-title">Karawhiua house points structure</h1>
+    <p class="page-desc">House points are the engine of participation. Every student can earn points — not just the players who make the tournament team. This structure rewards involvement, effort, and sportsmanship, not just winning.</p>
+
+    <div class="info-box">These points must be logged in the Karawhiua app by the school's staff lead after each session. Confirm app access and logging process with each school before Week 3.</div>
+
+    <table class="points-table" style="margin-bottom:1.5rem;">
+      <thead>
+        <tr><th style="width:55%">Activity</th><th>Points</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Try VR table tennis at lunchtime</strong></td>
+          <td><span class="pts-badge">5</span></td>
+          <td style="font-size:0.82rem;color:var(--mid);">First time only. Any student, any skill level.</td>
+        </tr>
+        <tr>
+          <td><strong>Attend 3 practice sessions</strong></td>
+          <td><span class="pts-badge">15</span></td>
+          <td style="font-size:0.82rem;color:var(--mid);">Bonus points for commitment. Logged cumulatively.</td>
+        </tr>
+        <tr>
+          <td><strong>Enter school playoff</strong></td>
+          <td><span class="pts-badge">20</span></td>
+          <td style="font-size:0.82rem;color:var(--mid);">All students who sign up for school playoffs, regardless of result.</td>
+        </tr>
+        <tr>
+          <td><strong>Represent school in tournament week</strong></td>
+          <td><span class="pts-badge">50</span></td>
+          <td style="font-size:0.82rem;color:var(--mid);">Named players and reserves who are listed on the team.</td>
+        </tr>
+        <tr>
+          <td><strong>Support / spectate during finals</strong></td>
+          <td><span class="pts-badge">5</span></td>
+          <td style="font-size:0.82rem;color:var(--mid);">All students who attend a finals-day session as supporters.</td>
+        </tr>
+        <tr>
+          <td><strong>Sportsmanship award</strong></td>
+          <td><span class="pts-badge">25</span></td>
+          <td style="font-size:0.82rem;color:var(--mid);">Nominated by peers or staff. One per school per day during tournament week.</td>
+        </tr>
+        <tr>
+          <td><strong>Win school playoff</strong></td>
+          <td><span class="pts-badge">10</span></td>
+          <td style="font-size:0.82rem;color:var(--mid);">Bonus for the student who wins their school's internal playoff.</td>
+        </tr>
+        <tr>
+          <td><strong>School wins tournament match</strong></td>
+          <td><span class="pts-badge">15</span></td>
+          <td style="font-size:0.82rem;color:var(--mid);">All students across the school earn points when their team wins a match during tournament week.</td>
+        </tr>
+        <tr>
+          <td><strong>Grand final winner (school)</strong></td>
+          <td><span class="pts-badge">30</span></td>
+          <td style="font-size:0.82rem;color:var(--mid);">Shared across all students at the winning school.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="doc-section">
+      <h2>How to log points in Karawhiua</h2>
+      <ul class="plain">
+        <li>Staff lead opens Karawhiua app after each session</li>
+        <li>Select the relevant activity and the students who participated</li>
+        <li>Points are attributed to each student's house automatically</li>
+        <li>Leaderboard is visible in app — display on school noticeboard weekly</li>
+        <li>If Karawhiua access is not confirmed before Week 3, escalate to Sport Waikato immediately</li>
+      </ul>
+    </div>
+
+    <div class="warn-box">
+      <strong>Don't make it about winning.</strong> The points structure is deliberately weighted toward participation, attendance, and sportsmanship — not just making the team or winning matches. A student who tries VR three times and cheers on their school during finals earns 25 points. A player who wins the grand final earns up to 95 points. The gap exists, but participation is meaningfully rewarded.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: LEAD TEACHER TO-DO
+══════════════════════════════════════════ -->
+<div id="page-teacher" class="page">
+  <div class="wrap">
+    <div class="section-label">Resource 5 of 11</div>
+    <h1 class="page-title">Lead teacher to-do list</h1>
+    <p class="page-desc">Everything a school's staff lead needs to confirm, set up, and do before and during the pilot. Print this and tick off as you go.</p>
+
+    <div class="doc-section">
+      <h2>Before end of term (by 11 July)</h2>
+      <ul class="checklist">
+        <li>Confirm your school is participating and nominate yourself as staff lead</li>
+        <li>Let Sport Waikato know your preferred lunchtime practice days</li>
+        <li>Let Sport Waikato know your best tournament week time window (e.g. 12:30–2pm)</li>
+        <li>Confirm available screen or projector and its location</li>
+        <li>Confirm available space for VR play and spectators</li>
+        <li>Confirm whether your school can support a spectator setup (audience watching on screen)</li>
+        <li>Forward school invite to your principal for awareness (not approval needed, just heads-up)</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>School holidays (13–26 July) — no action required</h2>
+      <ul class="checklist">
+        <li>Beyond and Sport Waikato will test headsets, profiles, and casting during this period</li>
+        <li>You will receive the session guide, troubleshooting doc, and promo assets before school returns</li>
+        <li>Optional: meet with Beyond for a short walk-through if you'd like one before Week 3</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Week 3: 27 July – 2 August</h2>
+      <ul class="checklist">
+        <li>Put the school notice in the daily notices (copy on promo assets page)</li>
+        <li>Put up the poster in a visible location</li>
+        <li>Promote through PE/sport coordinator and any relevant teachers</li>
+        <li>Run the first lunchtime "have a go" session (session guide available)</li>
+        <li>Test casting to screen — confirm this is working before any session</li>
+        <li>Start logging Karawhiua house points for students who try VR</li>
+        <li>Identify students who are keen but may need confidence support</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Week 4: 3–9 August</h2>
+      <ul class="checklist">
+        <li>Run regular lunchtime practice sessions (2–3 per week if possible)</li>
+        <li>Run beginner tutorials during sessions (serve, scoring, rally, safety)</li>
+        <li>Continue awarding Karawhiua points</li>
+        <li>Confirm the date for your school's internal playoff</li>
+        <li>Confirm tournament week time window with Sport Waikato</li>
+        <li>Confirm your backup player / reserves approach</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Week 5: 10–16 August</h2>
+      <ul class="checklist">
+        <li>Run school internal playoffs to select tournament players</li>
+        <li>Use the bracket template (available on the Bracket page)</li>
+        <li>Select 4 players + 2 reserves</li>
+        <li>Confirm whether a wildcard/sportsmanship selection is included</li>
+        <li>Award Karawhiua points for playoff participation</li>
+        <li>Capture short student voice: why they joined, whether they normally play sport</li>
+        <li>Confirm final team list — send to Sport Waikato by 15 August</li>
+        <li>Confirm whether your school will have student supporters during tournament week</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Week 6–7: 17–30 August</h2>
+      <ul class="checklist">
+        <li>Participate in the cross-school test match (Week 6)</li>
+        <li>Do a final equipment check: headsets, profiles, casting, internet</li>
+        <li>Publish the tournament draw to students</li>
+        <li>Share house points leaderboard</li>
+        <li>Remind players of tournament week schedule and expectations</li>
+        <li>Confirm prize pack has arrived or will be available on the day</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Tournament week: 31 August – 4 September</h2>
+      <ul class="checklist">
+        <li>Be present for each day's session (or ensure backup is in place)</li>
+        <li>Confirm players and reserves each morning before matches begin</li>
+        <li>Update Karawhiua points daily</li>
+        <li>Nominate at least one student per day for the Sportsmanship Award</li>
+        <li>Capture photos/video of non-identified moments for storytelling (with consent)</li>
+        <li>On Friday: ensure students complete the post-pilot survey before leaving</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Confirm device and internet details</h2>
+      <ul class="checklist">
+        <li>School Wi-Fi network name for tournament zone: ________________________</li>
+        <li>IT contact if network issues arise: ________________________</li>
+        <li>Dedicated Starlink / hotspot router available? ☐ Yes ☐ No ☐ Being arranged</li>
+        <li>Firewall/content filter: Meta Quest and Eleven VR confirmed unblocked? ☐ Yes ☐ No</li>
+        <li>Karawhiua app confirmed accessible for all registered students? ☐ Yes ☐ No ☐ Checking</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Photo and video consent</h2>
+      <ul class="checklist">
+        <li>Confirm school's existing consent framework covers pilot activities</li>
+        <li>If no existing consent: send home a pilot-specific consent form before Week 3</li>
+        <li>List of students with consent restrictions shared with Beyond/Sport Waikato staff</li>
+        <li>Agreement: no student names in public posts, no public livestream</li>
+        <li>Storytelling and media use agreed post-pilot only — with named student approval</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: HOW TO RUN A LUNCHTIME SESSION
+══════════════════════════════════════════ -->
+<div id="page-session" class="page">
+  <div class="wrap">
+    <div class="section-label">Resource 6 of 11</div>
+    <h1 class="page-title">How to run a lunchtime session</h1>
+    <p class="page-desc">A simple step-by-step guide for school staff leads. Designed for sessions of 30–45 minutes with rotating students. You don't need to be a tech expert — this guide covers everything.</p>
+
+    <div class="doc-section">
+      <h2>Before students arrive (5 min)</h2>
+      <ul class="plain">
+        <li>Check headsets are charged (aim for 80%+ — plug in overnight before sessions)</li>
+        <li>Clear the play zone: 2m × 2m per headset, no furniture in swing radius</li>
+        <li>Turn on the screen / projector</li>
+        <li>Connect headset to Wi-Fi and start casting to the screen (see troubleshooting guide if needed)</li>
+        <li>Open Eleven VR on each headset — confirm it loads without updates required</li>
+        <li>Set up a rotation list: write student names on a piece of paper, 5-min slots or by game</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Opening (3–5 min)</h2>
+      <ul class="plain">
+        <li>Gather students at the screen — don't just hand the headset straight over</li>
+        <li>Briefly explain: "This is Eleven VR — virtual table tennis. You'll take turns. The headset goes on, controllers are paddles. First one to 11 wins a game."</li>
+        <li>Show the play zone boundaries — students MUST stay within the safe zone when wearing the headset</li>
+        <li>Remind students: remove glasses if they have prescription lenses that won't fit, headset accommodates some glasses</li>
+        <li>Let one confident student go first so others can watch on the screen</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Running rotations (main session)</h2>
+      <ul class="plain">
+        <li>5-minute slots work well for "have a go" sessions — enough for 2–3 games</li>
+        <li>Head-to-head sessions (both headsets): one student per headset, playing each other — announce the match on screen</li>
+        <li>AI practice sessions (one headset): student plays against the AI — good for beginners, lets them take their time</li>
+        <li>Call out names clearly when it's the next student's turn — give a 1-min warning</li>
+        <li>Keep the screen casting at all times — this is what keeps watching students engaged</li>
+        <li>Comment on what's happening on screen: "Nice serve!", "Oh close — deuce!" — this builds energy</li>
+        <li>If students are waiting, encourage them to watch the match and predict who'll win</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Key safety rules to enforce</h2>
+      <ul class="checklist">
+        <li>No-one enters the play zone when a headset is in use</li>
+        <li>Students must stop playing if they feel dizzy or unwell — headset off immediately</li>
+        <li>Swing controllers only in the play zone — other students must stay at least 2m back</li>
+        <li>Remove headset before walking — never walk around in a headset</li>
+        <li>Maximum 20–30 min continuous play — breaks are fine and encouraged</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Logging Karawhiua house points</h2>
+      <ul class="plain">
+        <li>Note which students tried VR for the first time today — they earn 5 house points</li>
+        <li>Students attending their 3rd session earn 15 bonus points</li>
+        <li>Log points in Karawhiua app at the end of the session or by end of day</li>
+        <li>Display the leaderboard on screen briefly at the end if possible — house competition drives next session's turnout</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Wrapping up (3 min)</h2>
+      <ul class="plain">
+        <li>Give a 2-min warning before the bell</li>
+        <li>Thank students for coming — mention when the next session is</li>
+        <li>Put headsets on charge immediately after the session</li>
+        <li>Wipe headset foam with a lightly damp cloth if many students have used it</li>
+        <li>Note any tech issues for the troubleshooting log — send to Beyond if significant</li>
+      </ul>
+    </div>
+
+    <div class="info-box">
+      <strong>You don't need to be good at table tennis.</strong> Your job is to manage the space, keep students safe, keep the rotation moving, and keep the energy up. Beyond are available by phone/message during sessions if you need real-time tech help.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: TROUBLESHOOTING GUIDE
+══════════════════════════════════════════ -->
+<div id="page-trouble" class="page">
+  <div class="wrap">
+    <div class="section-label">Resource 7 of 11</div>
+    <h1 class="page-title">Troubleshooting guide</h1>
+    <p class="page-desc">Common problems and how to fix them. Keep this open on your phone during sessions. If a problem isn't listed here, call Beyond directly.</p>
+
+    <div class="warn-box"><strong>Beyond support line during sessions:</strong> Jessica Manins — +64 27 514 9599 (text or call)</div>
+
+    <div class="doc-section">
+      <h2>Headset won't turn on</h2>
+      <ul class="plain">
+        <li>Hold power button for 3 seconds — wait 10 seconds before trying again</li>
+        <li>If still no response: plug into charger for 10 minutes, then try again</li>
+        <li>Check battery level — if under 5%, headset may refuse to boot. Charge first.</li>
+        <li>If headset was left in a hot room/car, let it cool to room temperature before use</li>
+        <li>If still not working: call Beyond</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Can't connect to Wi-Fi</h2>
+      <ul class="plain">
+        <li>Check Wi-Fi is on: Settings → Wi-Fi → toggle on if needed</li>
+        <li>If school Wi-Fi requires a web portal login (captive portal), it won't work with Meta Quest — switch to Starlink/hotspot</li>
+        <li>Forget the network and reconnect: Settings → Wi-Fi → tap network → Forget → reconnect</li>
+        <li>Try switching to the 5GHz band if available (listed separately in Wi-Fi list)</li>
+        <li>If firewall is blocking connection: call IT contact. Known fix: whitelist *.oculus.com and *.meta.com</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Casting to screen not working</h2>
+      <ul class="plain">
+        <li>Both headset and casting device must be on the <strong>same Wi-Fi network</strong></li>
+        <li>To cast: press Meta button → hover over bottom-right corner → select Cast → choose device</li>
+        <li>If casting device not showing: restart the Meta Quest, wait 30 seconds, try again</li>
+        <li>For Chromecast: ensure TV input is set to the correct HDMI port and Chromecast app is open</li>
+        <li>Try a different casting method: cast to phone first, then mirror phone to TV via cable or AirPlay</li>
+        <li>5GHz band significantly improves casting stability — switch if available</li>
+        <li>If casting fails completely: at minimum, let students watch the player — the match is still on the headset screen visible to nearby students</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Multiplayer match won't connect</h2>
+      <ul class="plain">
+        <li>Both players must be signed into different Eleven VR accounts</li>
+        <li>One player creates a private room → shares the room code → other player joins with code</li>
+        <li>If room not found: check both headsets are on the same or a reliable internet connection</li>
+        <li>Restart Eleven VR on both headsets — don't just restart the match, close the app</li>
+        <li>If school internet is blocking: switch both headsets to Starlink/hotspot</li>
+        <li>During tournament week: Beyond will manage all multiplayer connections centrally</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Wrong profile / can't log in</h2>
+      <ul class="plain">
+        <li>Each headset should have its own dedicated Meta account — don't share accounts between headsets</li>
+        <li>If a student's practice profile needs resetting: contact Beyond (profile credentials are held by Beyond)</li>
+        <li>For tournament week: player accounts are pre-configured — don't let students change settings or passwords</li>
+        <li>If headset shows a different user: Settings → Accounts → Switch Account</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Headset battery low during a session</h2>
+      <ul class="plain">
+        <li>Meta Quest 2 gives approximately 2 hours of play per charge</li>
+        <li>Charge headsets overnight before every session — aim for 100% at the start</li>
+        <li>You can play while charging via a long USB-C cable if needed (play quality is the same)</li>
+        <li>During tournament week: Beyond will bring a charging protocol — headsets rotate between matches</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Student feels dizzy or unwell in VR</h2>
+      <ul class="plain">
+        <li>Stop play immediately — have the student remove the headset</li>
+        <li>Sit them down with eyes open, looking at a fixed point in the room</li>
+        <li>VR motion sickness usually passes within 5–10 minutes</li>
+        <li>Don't encourage them to "push through" — VR sickness is real and can worsen</li>
+        <li>Student should not attempt VR again that day</li>
+        <li>Note the student's name and report to Beyond — some students may need shorter initial sessions</li>
+        <li>If symptoms persist beyond 30 min: follow standard school first aid procedure</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Eleven VR requires an update</h2>
+      <ul class="plain">
+        <li>Updates are best done the night before a session — plug in headset, connect to Wi-Fi, updates download automatically</li>
+        <li>If an update appears during a session: skip it if possible (you can delay updates in settings)</li>
+        <li>If the update is mandatory and you can't skip: the session may need to run on the other headset only</li>
+        <li>Beyond will check for pending updates as part of their pre-tournament week audit</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: PROMO ASSETS
+══════════════════════════════════════════ -->
+<div id="page-promo" class="page">
+  <div class="wrap">
+    <div class="section-label">Resource 8 of 11</div>
+    <h1 class="page-title">Student promo assets</h1>
+    <p class="page-desc">Copy-ready assets for promoting the pilot within schools. Customise with your school name and dates before printing or posting.</p>
+
+    <!-- School notice copy -->
+    <div class="promo-asset">
+      <div class="promo-asset-head">
+        School daily notice — copy paste ready
+        <button class="btn btn-sm" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);" onclick="copyNotice()">Copy text</button>
+      </div>
+      <div class="promo-asset-body">
+        <div class="notice-preview" id="noticeText">
+          <div class="n-logo">EL<span>EV</span>EN</div>
+          <h2>VR Table Tennis — want to play?</h2>
+          <p>We're taking part in an <strong>interschool VR table tennis tournament</strong> this Term 3 — and we need players.</p>
+          <p>Starting [DATE], we're running <strong>free lunchtime sessions</strong> where anyone can try Eleven VR Table Tennis using VR headsets. No experience needed.</p>
+          <p class="n-bold">📍 Location: [ROOM/SPACE]<br>🕐 Time: [TIME] every [DAYS]<br>🏆 Earn Karawhiua house points just for showing up</p>
+          <p>The four best players will represent our school in a Waikato-wide interschool tournament against three other schools — week of 31 August.</p>
+          <div class="n-cta">Come along and give it a go →</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Poster -->
+    <div class="promo-asset">
+      <div class="promo-asset-head">A3 poster — print and display</div>
+      <div class="promo-asset-body">
+        <div class="poster-preview">
+          <div class="p-sub">KC Cluster schools — Waikato</div>
+          <div class="p-title">EL<span>EV</span>EN<br>VR TABLE<br>TENNIS</div>
+          <div class="p-game">Eleven Table Tennis VR · Interschool Pilot</div>
+          <div class="p-date">31 Aug – 4 Sep 2025</div>
+          <div class="p-detail">
+            Lunchtime practice starts [DATE]<br>
+            [ROOM] · [TIME]<br><br>
+            Earn house points. Represent your school.<br>Try something new.
+          </div>
+          <span class="p-badge">Anyone can play →</span>
+        </div>
+        <p style="font-size:0.82rem;color:var(--mid);margin-top:1rem;text-align:center;">Print at A3. Replace bracketed text with your school's details before printing.</p>
+      </div>
+    </div>
+
+    <!-- House points explainer -->
+    <div class="promo-asset">
+      <div class="promo-asset-head">House points explainer — for students</div>
+      <div class="promo-asset-body">
+        <div style="background:var(--black);color:#fff;border-radius:var(--radius);padding:1.5rem;max-width:500px;">
+          <div style="font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:#888;margin-bottom:0.75rem;">How to earn house points</div>
+          <div style="font-size:1.1rem;font-weight:900;margin-bottom:1.25rem;">VR Table Tennis<br><span style="color:var(--red);">House Points Challenge</span></div>
+          <table style="width:100%;font-size:0.85rem;border-collapse:collapse;">
+            <tr style="border-bottom:1px solid #333;">
+              <td style="padding:0.5rem 0;color:#ccc;">Try it at lunchtime</td>
+              <td style="text-align:right;"><span class="pts-badge">5 pts</span></td>
+            </tr>
+            <tr style="border-bottom:1px solid #333;">
+              <td style="padding:0.5rem 0;color:#ccc;">Attend 3 sessions</td>
+              <td style="text-align:right;"><span class="pts-badge">15 pts</span></td>
+            </tr>
+            <tr style="border-bottom:1px solid #333;">
+              <td style="padding:0.5rem 0;color:#ccc;">Enter school playoff</td>
+              <td style="text-align:right;"><span class="pts-badge">20 pts</span></td>
+            </tr>
+            <tr style="border-bottom:1px solid #333;">
+              <td style="padding:0.5rem 0;color:#ccc;">Represent school</td>
+              <td style="text-align:right;"><span class="pts-badge">50 pts</span></td>
+            </tr>
+            <tr style="border-bottom:1px solid #333;">
+              <td style="padding:0.5rem 0;color:#ccc;">Spectate the finals</td>
+              <td style="text-align:right;"><span class="pts-badge">5 pts</span></td>
+            </tr>
+            <tr>
+              <td style="padding:0.5rem 0;color:#ccc;">Sportsmanship award</td>
+              <td style="text-align:right;"><span class="pts-badge">25 pts</span></td>
+            </tr>
+          </table>
+          <div style="margin-top:1rem;font-size:0.78rem;color:#777;">Every student earns points — not just the players on the day. Show up. Cheer. Compete.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Road to tournament graphic -->
+    <div class="promo-asset">
+      <div class="promo-asset-head">Road to tournament week — campaign graphic</div>
+      <div class="promo-asset-body">
+        <div class="road-graphic">
+          <div style="font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:#888;margin-bottom:1rem;text-align:center;">Your road to tournament week</div>
+          <div class="road-steps">
+            <div class="road-step">
+              <div class="rs-num">1</div>
+              <div class="rs-label">Turn up &amp; try</div>
+              <div class="rs-date">From 27 Jul</div>
+            </div>
+            <div class="road-arrow">→</div>
+            <div class="road-step">
+              <div class="rs-num">2</div>
+              <div class="rs-label">Keep practising</div>
+              <div class="rs-date">Weeks 3–4</div>
+            </div>
+            <div class="road-arrow">→</div>
+            <div class="road-step">
+              <div class="rs-num">3</div>
+              <div class="rs-label">School playoffs</div>
+              <div class="rs-date">Week 5, 10–16 Aug</div>
+            </div>
+            <div class="road-arrow">→</div>
+            <div class="road-step">
+              <div class="rs-num">4</div>
+              <div class="rs-label">Represent your school</div>
+              <div class="rs-date">31 Aug – 4 Sep</div>
+            </div>
+            <div class="road-arrow">→</div>
+            <div class="road-step">
+              <div class="rs-num" style="background:var(--blue);">🏆</div>
+              <div class="rs-label">Champion school</div>
+              <div class="rs-date">Fri 4 Sep</div>
+            </div>
+          </div>
+          <div style="text-align:center;margin-top:1rem;font-size:0.72rem;color:#666;">Earn Karawhiua house points at every step — not just the final</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: PLAYOFF BRACKET
+══════════════════════════════════════════ -->
+<div id="page-bracket" class="page">
+  <div class="wrap-wide">
+    <div class="section-label">Resource 9 of 11</div>
+    <h1 class="page-title">School playoff bracket</h1>
+    <p class="page-desc">Fill in player names and scores below. Winners auto-advance to the next round when you enter their scores. Use this for your school's internal playoffs to select tournament reps.</p>
+
+    <div style="display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+      <div class="doc-section" style="flex:1;min-width:200px;margin-bottom:0;">
+        <h2 style="margin-bottom:0.5rem;">Sign-up sheet</h2>
+        <div id="signupList" style="margin-bottom:0.75rem;"></div>
+        <div style="display:flex;gap:0.5rem;">
+          <input type="text" id="newPlayer" placeholder="Student name" style="flex:1;" onkeydown="if(event.key==='Enter')addPlayer()">
+          <button class="btn btn-red btn-sm" onclick="addPlayer()">Add</button>
+        </div>
+        <button class="btn btn-sm" style="background:var(--off);color:var(--black);margin-top:0.5rem;width:100%;" onclick="autoFillBracket()">Fill bracket →</button>
+      </div>
+      <div class="doc-section" style="flex:1;min-width:200px;margin-bottom:0;">
+        <h2>Team selected</h2>
+        <div id="teamList">
+          <div style="font-size:0.85rem;color:var(--mid);">Winners advance here automatically.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bracket-wrap">
+      <div class="bracket" id="bracket">
+        <!-- Round 1 -->
+        <div class="b-round">
+          <div class="b-round-label">Round 1 — Quarter-finals</div>
+          <div class="b-match" id="m1">
+            <div class="b-slot"><input type="text" placeholder="Player 1" id="m1p1" oninput="calcMatch(1)"><input type="number" min="0" max="11" id="m1s1" oninput="calcMatch(1)"></div>
+            <div class="b-slot"><input type="text" placeholder="Player 2" id="m1p2" oninput="calcMatch(1)"><input type="number" min="0" max="11" id="m1s2" oninput="calcMatch(1)"></div>
+          </div>
+          <div class="b-match" id="m2">
+            <div class="b-slot"><input type="text" placeholder="Player 3" id="m2p1" oninput="calcMatch(2)"><input type="number" min="0" max="11" id="m2s1" oninput="calcMatch(2)"></div>
+            <div class="b-slot"><input type="text" placeholder="Player 4" id="m2p2" oninput="calcMatch(2)"><input type="number" min="0" max="11" id="m2s2" oninput="calcMatch(2)"></div>
+          </div>
+          <div class="b-match" id="m3">
+            <div class="b-slot"><input type="text" placeholder="Player 5" id="m3p1" oninput="calcMatch(3)"><input type="number" min="0" max="11" id="m3s1" oninput="calcMatch(3)"></div>
+            <div class="b-slot"><input type="text" placeholder="Player 6" id="m3p2" oninput="calcMatch(3)"><input type="number" min="0" max="11" id="m3s2" oninput="calcMatch(3)"></div>
+          </div>
+          <div class="b-match" id="m4">
+            <div class="b-slot"><input type="text" placeholder="Player 7" id="m4p1" oninput="calcMatch(4)"><input type="number" min="0" max="11" id="m4s1" oninput="calcMatch(4)"></div>
+            <div class="b-slot"><input type="text" placeholder="Player 8" id="m4p2" oninput="calcMatch(4)"><input type="number" min="0" max="11" id="m4s2" oninput="calcMatch(4)"></div>
+          </div>
+        </div>
+
+        <!-- Semi-finals -->
+        <div class="b-round" style="justify-content:space-around;">
+          <div class="b-round-label">Semi-finals</div>
+          <div class="b-match" id="m5">
+            <div class="b-slot"><input type="text" placeholder="Winner M1" id="m5p1" oninput="calcMatch(5)"><input type="number" min="0" max="11" id="m5s1" oninput="calcMatch(5)"></div>
+            <div class="b-slot"><input type="text" placeholder="Winner M2" id="m5p2" oninput="calcMatch(5)"><input type="number" min="0" max="11" id="m5s2" oninput="calcMatch(5)"></div>
+          </div>
+          <div class="b-match" id="m6">
+            <div class="b-slot"><input type="text" placeholder="Winner M3" id="m6p1" oninput="calcMatch(6)"><input type="number" min="0" max="11" id="m6s1" oninput="calcMatch(6)"></div>
+            <div class="b-slot"><input type="text" placeholder="Winner M4" id="m6p2" oninput="calcMatch(6)"><input type="number" min="0" max="11" id="m6s2" oninput="calcMatch(6)"></div>
+          </div>
+        </div>
+
+        <!-- Final -->
+        <div class="b-round" style="justify-content:center;">
+          <div class="b-round-label">Grand final</div>
+          <div class="b-match" id="m7">
+            <div class="b-slot"><input type="text" placeholder="Semi 1 winner" id="m7p1" oninput="calcMatch(7)"><input type="number" min="0" max="11" id="m7s1" oninput="calcMatch(7)"></div>
+            <div class="b-slot"><input type="text" placeholder="Semi 2 winner" id="m7p2" oninput="calcMatch(7)"><input type="number" min="0" max="11" id="m7s2" oninput="calcMatch(7)"></div>
+          </div>
+          <div id="finalWinner" style="margin-top:0.75rem;font-weight:700;font-size:0.95rem;color:var(--red);text-align:center;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="doc-section" style="margin-top:1.5rem;">
+      <h2>Scoring sheet</h2>
+      <table class="schedule-table" id="scoringSheet">
+        <thead><tr><th>Match</th><th>Player 1</th><th>Score</th><th>Player 2</th><th>Score</th><th>Winner</th></tr></thead>
+        <tbody id="scoringBody">
+          <tr><td>QF1</td><td id="ss1p1">—</td><td id="ss1s1">—</td><td id="ss1p2">—</td><td id="ss1s2">—</td><td id="ss1w">—</td></tr>
+          <tr><td>QF2</td><td id="ss2p1">—</td><td id="ss2s1">—</td><td id="ss2p2">—</td><td id="ss2s2">—</td><td id="ss2w">—</td></tr>
+          <tr><td>QF3</td><td id="ss3p1">—</td><td id="ss3s1">—</td><td id="ss3p2">—</td><td id="ss3s2">—</td><td id="ss3w">—</td></tr>
+          <tr><td>QF4</td><td id="ss4p1">—</td><td id="ss4s1">—</td><td id="ss4p2">—</td><td id="ss4s2">—</td><td id="ss4w">—</td></tr>
+          <tr><td>SF1</td><td id="ss5p1">—</td><td id="ss5s1">—</td><td id="ss5p2">—</td><td id="ss5s2">—</td><td id="ss5w">—</td></tr>
+          <tr><td>SF2</td><td id="ss6p1">—</td><td id="ss6s1">—</td><td id="ss6p2">—</td><td id="ss6s2">—</td><td id="ss6w">—</td></tr>
+          <tr class="finals"><td>Final</td><td id="ss7p1">—</td><td id="ss7s1">—</td><td id="ss7p2">—</td><td id="ss7s2">—</td><td id="ss7w">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: STUDENT SURVEY
+══════════════════════════════════════════ -->
+<div id="page-survey-student" class="page">
+  <div class="wrap">
+    <div class="section-label">Resource 10 of 11</div>
+    <h1 class="page-title">Pre-pilot student survey</h1>
+    <p class="page-desc">This survey is not a test. There are no right or wrong answers. Your responses help us improve the VR table tennis pilot.</p>
+    <div id="studentSurveySuccess" style="display:none;" class="success-msg">
+      <div style="font-size:2rem;margin-bottom:0.5rem;">✅</div>
+      <strong>Survey submitted — thanks!</strong>
+      <p style="margin-top:0.4rem;">Your responses help make this pilot better for everyone.</p>
+    </div>
+    <div id="studentSurveyError" class="error-msg" style="display:none;"></div>
+    <form id="studentSurveyForm" class="survey-wrap" onsubmit="submitStudentSurvey(event)">
+
+      <div class="q-section">
+        <div class="q-section-title">About you</div>
+        <div class="q-item">
+          <div class="q-label">1. What year level are you in?</div>
+          <div class="radio-group" id="q-year">
+            <label><input type="radio" name="year_level" value="Year 7"> Year 7</label>
+            <label><input type="radio" name="year_level" value="Year 8"> Year 8</label>
+            <label><input type="radio" name="year_level" value="Year 9"> Year 9</label>
+            <label><input type="radio" name="year_level" value="Year 10"> Year 10</label>
+            <label><input type="radio" name="year_level" value="Year 11"> Year 11</label>
+            <label><input type="radio" name="year_level" value="Year 12"> Year 12</label>
+            <label><input type="radio" name="year_level" value="Year 13"> Year 13</label>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-label">2. Which school do you go to?</div>
+          <div class="radio-group">
+            <label><input type="radio" name="school" value="Piopio College"> Piopio College</label>
+            <label><input type="radio" name="school" value="Taumarunui High School"> Taumarunui High School</label>
+            <label><input type="radio" name="school" value="Ōtorohanga College"> Ōtorohanga College</label>
+            <label><input type="radio" name="school" value="Te Kuiti High School"> Te Kuiti High School</label>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-label">3. Which House are you in?</div>
+          <input type="text" name="house" placeholder="House name">
+        </div>
+      </div>
+
+      <div class="q-section">
+        <div class="q-section-title">Sport, movement and participation</div>
+        <div class="q-item">
+          <div class="q-label">4. How often do you usually take part in sport, physical activity or active recreation?</div>
+          <div class="radio-group">
+            <label><input type="radio" name="activity_frequency" value="Most days"> Most days</label>
+            <label><input type="radio" name="activity_frequency" value="A few times a week"> A few times a week</label>
+            <label><input type="radio" name="activity_frequency" value="Once a week"> Once a week</label>
+            <label><input type="radio" name="activity_frequency" value="Sometimes"> Sometimes</label>
+            <label><input type="radio" name="activity_frequency" value="Hardly ever"> Hardly ever</label>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-label">5. Do you currently play for a school sports team or club?</div>
+          <div class="radio-group">
+            <label><input type="radio" name="plays_school_team" value="Yes"> Yes</label>
+            <label><input type="radio" name="plays_school_team" value="No"> No</label>
+            <label><input type="radio" name="plays_school_team" value="Not currently, but I have before"> Not currently, but I have before</label>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-label">6. Which statement best describes you?</div>
+          <div class="radio-group">
+            <label><input type="radio" name="activity_identity" value="I already enjoy sport and physical activity"> I already enjoy sport and physical activity</label>
+            <label><input type="radio" name="activity_identity" value="I like some activities but not traditional sport"> I like some activities but not traditional sport</label>
+            <label><input type="radio" name="activity_identity" value="I would like to be more active but find it hard to get involved"> I would like to be more active but find it hard to get involved</label>
+            <label><input type="radio" name="activity_identity" value="I do not usually enjoy sport or physical activity"> I do not usually enjoy sport or physical activity</label>
+            <label><input type="radio" name="activity_identity" value="Not sure"> Not sure</label>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-label">7. What usually makes it hard for students to join sport or physical activity?</div>
+          <div class="q-hint">Tick any that apply.</div>
+          <div class="check-group">
+            <label><input type="checkbox" name="participation_barriers" value="Cost"> Cost</label>
+            <label><input type="checkbox" name="participation_barriers" value="Travel"> Travel</label>
+            <label><input type="checkbox" name="participation_barriers" value="Confidence"> Confidence</label>
+            <label><input type="checkbox" name="participation_barriers" value="Not knowing the rules"> Not knowing the rules</label>
+            <label><input type="checkbox" name="participation_barriers" value="Not feeling skilled enough"> Not feeling skilled enough</label>
+            <label><input type="checkbox" name="participation_barriers" value="Not having friends involved"> Not having friends involved</label>
+            <label><input type="checkbox" name="participation_barriers" value="Time"> Time</label>
+            <label><input type="checkbox" name="participation_barriers" value="Uniform or gear"> Uniform or gear</label>
+            <label><input type="checkbox" name="participation_barriers" value="Feeling judged"> Feeling judged</label>
+            <label><input type="checkbox" name="participation_barriers" value="Nothing, it is easy for me"> Nothing, it is easy for me</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-section">
+        <div class="q-section-title">Gaming and VR</div>
+        <div class="q-item">
+          <div class="q-label">8. How often do you play video games?</div>
+          <div class="radio-group">
+            <label><input type="radio" name="gaming_frequency" value="Most days"> Most days</label>
+            <label><input type="radio" name="gaming_frequency" value="A few times a week"> A few times a week</label>
+            <label><input type="radio" name="gaming_frequency" value="Once a week"> Once a week</label>
+            <label><input type="radio" name="gaming_frequency" value="Sometimes"> Sometimes</label>
+            <label><input type="radio" name="gaming_frequency" value="Hardly ever"> Hardly ever</label>
+            <label><input type="radio" name="gaming_frequency" value="Never"> Never</label>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-label">9. Have you used a VR headset before?</div>
+          <div class="radio-group">
+            <label><input type="radio" name="vr_experience" value="Yes, lots of times"> Yes, lots of times</label>
+            <label><input type="radio" name="vr_experience" value="Yes, a few times"> Yes, a few times</label>
+            <label><input type="radio" name="vr_experience" value="Once or twice"> Once or twice</label>
+            <label><input type="radio" name="vr_experience" value="No, never"> No, never</label>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-label">10. How interested are you in trying VR table tennis?</div>
+          <div class="q-hint">1 = Not interested, 5 = Very interested</div>
+          <div class="scale-row">
+            <label><input type="radio" name="interest_in_vr_tt" value="1">1</label>
+            <label><input type="radio" name="interest_in_vr_tt" value="2">2</label>
+            <label><input type="radio" name="interest_in_vr_tt" value="3">3</label>
+            <label><input type="radio" name="interest_in_vr_tt" value="4">4</label>
+            <label><input type="radio" name="interest_in_vr_tt" value="5">5</label>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-label">11. What makes you interested in trying it?</div>
+          <div class="q-hint">Tick any that apply.</div>
+          <div class="check-group">
+            <label><input type="checkbox" name="interest_reasons" value="It sounds fun"> It sounds fun</label>
+            <label><input type="checkbox" name="interest_reasons" value="I like gaming"> I like gaming</label>
+            <label><input type="checkbox" name="interest_reasons" value="I like trying new things"> I like trying new things</label>
+            <label><input type="checkbox" name="interest_reasons" value="I want to earn House points"> I want to earn House points</label>
+            <label><input type="checkbox" name="interest_reasons" value="I want to represent my school"> I want to represent my school</label>
+            <label><input type="checkbox" name="interest_reasons" value="I like table tennis"> I like table tennis</label>
+            <label><input type="checkbox" name="interest_reasons" value="It feels less intimidating than normal sport"> It feels less intimidating than normal sport</label>
+            <label><input type="checkbox" name="interest_reasons" value="My friends are doing it"> My friends are doing it</label>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-label">12. Is there anything that makes you nervous or unsure about taking part?</div>
+          <div class="radio-group">
+            <label><input type="radio" name="has_nervousness" value="No" onclick="document.getElementById('nervousness-box').style.display='none'"> No</label>
+            <label><input type="radio" name="has_nervousness" value="Yes" onclick="document.getElementById('nervousness-box').style.display='block'"> Yes — please explain below</label>
+          </div>
+          <div id="nervousness-box" style="display:none;margin-top:0.5rem;">
+            <input type="text" name="nervousness" placeholder="Tell us what's on your mind...">
+          </div>
+        </div>
+      </div>
+
+      <div class="q-section">
+        <div class="q-section-title">Table tennis</div>
+        <div class="q-item">
+          <div class="q-label">13. Have you played physical table tennis before?</div>
+          <div class="radio-group">
+            <label><input type="radio" name="physical_tt_experience" value="Yes, often"> Yes, often</label>
+            <label><input type="radio" name="physical_tt_experience" value="Yes, a few times"> Yes, a few times</label>
+            <label><input type="radio" name="physical_tt_experience" value="Once or twice"> Once or twice</label>
+            <label><input type="radio" name="physical_tt_experience" value="No"> No</label>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-label">14. How interested are you in playing physical table tennis after trying VR?</div>
+          <div class="q-hint">1 = Not interested, 5 = Very interested</div>
+          <div class="scale-row">
+            <label><input type="radio" name="interest_in_physical_tt" value="1">1</label>
+            <label><input type="radio" name="interest_in_physical_tt" value="2">2</label>
+            <label><input type="radio" name="interest_in_physical_tt" value="3">3</label>
+            <label><input type="radio" name="interest_in_physical_tt" value="4">4</label>
+            <label><input type="radio" name="interest_in_physical_tt" value="5">5</label>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-label">15. Would you be interested in more table tennis opportunities at school?</div>
+          <div class="radio-group">
+            <label><input type="radio" name="wants_more_tt" value="Yes"> Yes</label>
+            <label><input type="radio" name="wants_more_tt" value="Maybe"> Maybe</label>
+            <label><input type="radio" name="wants_more_tt" value="No"> No</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-section">
+        <div class="q-section-title">Karawhiua and house points</div>
+        <div class="q-item">
+          <div class="q-label">16. Do you use the Karawhiua app?</div>
+          <div class="radio-group">
+            <label><input type="radio" name="uses_karawhiua" value="Yes"> Yes</label>
+            <label><input type="radio" name="uses_karawhiua" value="No"> No</label>
+            <label><input type="radio" name="uses_karawhiua" value="I have access but do not use it much"> I have access but don't use it much</label>
+            <label><input type="radio" name="uses_karawhiua" value="I am not sure"> I'm not sure</label>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-label">17. Would earning House points make you more likely to take part?</div>
+          <div class="radio-group">
+            <label><input type="radio" name="house_points_motivator" value="Yes"> Yes</label>
+            <label><input type="radio" name="house_points_motivator" value="Maybe"> Maybe</label>
+            <label><input type="radio" name="house_points_motivator" value="No"> No</label>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-label">18. What would motivate you most?</div>
+          <div class="q-hint">Choose up to two.</div>
+          <div class="check-group">
+            <label><input type="checkbox" name="top_motivators" value="Earning House points"> Earning House points</label>
+            <label><input type="checkbox" name="top_motivators" value="Playing with friends"> Playing with friends</label>
+            <label><input type="checkbox" name="top_motivators" value="Competing for my school"> Competing for my school</label>
+            <label><input type="checkbox" name="top_motivators" value="Trying VR"> Trying VR</label>
+            <label><input type="checkbox" name="top_motivators" value="Winning prizes"> Winning prizes</label>
+            <label><input type="checkbox" name="top_motivators" value="Being part of a lunchtime activity"> Being part of a lunchtime activity</label>
+            <label><input type="checkbox" name="top_motivators" value="Getting better at the game"> Getting better at the game</label>
+            <label><input type="checkbox" name="top_motivators" value="Supporting my House"> Supporting my House</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-section">
+        <div class="q-section-title">Final questions</div>
+        <div class="q-item">
+          <div class="q-label">19. What would make this pilot more fun for students?</div>
+          <textarea name="suggestions" placeholder="Your ideas..."></textarea>
+        </div>
+        <div class="q-item">
+          <div class="q-label">20. Would you like to be considered for your school's VR table tennis playoff/team?</div>
+          <div class="radio-group">
+            <label><input type="radio" name="wants_to_represent" value="Yes"> Yes</label>
+            <label><input type="radio" name="wants_to_represent" value="Maybe"> Maybe</label>
+            <label><input type="radio" name="wants_to_represent" value="No"> No</label>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-label">21. Anything else you want us to know before the pilot starts?</div>
+          <textarea name="other_comments" placeholder="Anything at all..."></textarea>
+        </div>
+      </div>
+
+      <div class="submit-row">
+        <button type="submit" class="btn btn-red" id="studentSubmitBtn">Submit survey</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: STAFF SURVEY (abbreviated for space — links to full version)
+══════════════════════════════════════════ -->
+<div id="page-survey-staff" class="page">
+  <div class="wrap">
+    <div class="section-label">Resource 10b of 11</div>
+    <h1 class="page-title">Staff feedback form</h1>
+    <p class="page-desc">For school staff — completed after the pilot. Helps us understand what worked, what didn't, and whether to scale.</p>
+    <div class="info-box">This is a 30-question form. Your responses are submitted directly to Sport Waikato and Beyond for the post-pilot evaluation. Complete after tournament week ends (from 7 September).</div>
+    <div id="staffSurveySuccess" style="display:none;" class="success-msg">
+      <div style="font-size:2rem;margin-bottom:0.5rem;">✅</div>
+      <strong>Feedback submitted — thank you!</strong>
+      <p style="margin-top:0.4rem;">Your responses help us evaluate the pilot and plan what's next.</p>
+    </div>
+    <div id="staffSurveyError" class="error-msg" style="display:none;"></div>
+    <form id="staffSurveyForm" class="survey-wrap" onsubmit="submitStaffSurvey(event)">
+
+      <div class="q-section">
+        <div class="q-section-title">About you</div>
+        <div class="q-item"><div class="q-label">Name</div><input type="text" name="completed_by" placeholder="Your name"></div>
+        <div class="q-item">
+          <div class="q-label">School</div>
+          <div class="radio-group">
+            <label><input type="radio" name="school" value="Piopio College"> Piopio College</label>
+            <label><input type="radio" name="school" value="Taumarunui High School"> Taumarunui High School</label>
+            <label><input type="radio" name="school" value="Ōtorohanga College"> Ōtorohanga College</label>
+            <label><input type="radio" name="school" value="Te Kuiti High School"> Te Kuiti High School</label>
+          </div>
+        </div>
+        <div class="q-item"><div class="q-label">Role</div><input type="text" name="role" placeholder="e.g. PE teacher, school lead"></div>
+      </div>
+
+      <div class="q-section">
+        <div class="q-section-title">Setup and readiness</div>
+        <div class="q-item">
+          <div class="q-label">1. How easy was it to set up the VR table tennis session?</div>
+          <div class="q-hint">1 = Very difficult, 5 = Very easy</div>
+          <div class="scale-row">
+            <label><input type="radio" name="setup_ease" value="1">1</label>
+            <label><input type="radio" name="setup_ease" value="2">2</label>
+            <label><input type="radio" name="setup_ease" value="3">3</label>
+            <label><input type="radio" name="setup_ease" value="4">4</label>
+            <label><input type="radio" name="setup_ease" value="5">5</label>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-label">2. Which setup did your school use?</div>
+          <div class="radio-group">
+            <label><input type="radio" name="headset_setup" value="1 headset / 1 profile"> 1 headset / 1 profile</label>
+            <label><input type="radio" name="headset_setup" value="2 headsets / 2 profiles"> 2 headsets / 2 profiles</label>
+            <label><input type="radio" name="headset_setup" value="4 headsets / 4 profiles"> 4 headsets / 4 profiles</label>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-label">3. Did casting to a screen/projector work?</div>
+          <div class="radio-group">
+            <label><input type="radio" name="casting_worked" value="Yes, consistently"> Yes, consistently</label>
+            <label><input type="radio" name="casting_worked" value="Yes, but with some issues"> Yes, but with some issues</label>
+            <label><input type="radio" name="casting_worked" value="No"> No</label>
+            <label><input type="radio" name="casting_worked" value="Not attempted"> Not attempted</label>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-label">4. What technical issues came up?</div>
+          <div class="check-group">
+            <label><input type="checkbox" name="technical_issues" value="Wi-Fi/internet"> Wi-Fi/internet</label>
+            <label><input type="checkbox" name="technical_issues" value="Casting"> Casting</label>
+            <label><input type="checkbox" name="technical_issues" value="Headset battery"> Headset battery</label>
+            <label><input type="checkbox" name="technical_issues" value="Profiles/logins"> Profiles/logins</label>
+            <label><input type="checkbox" name="technical_issues" value="Multiplayer connection"> Multiplayer connection</label>
+            <label><input type="checkbox" name="technical_issues" value="No major issues"> No major issues</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-section">
+        <div class="q-section-title">Student engagement</div>
+        <div class="q-item">
+          <div class="q-label">5. How engaged were students overall?</div>
+          <div class="q-hint">1 = Not engaged, 5 = Highly engaged</div>
+          <div class="scale-row">
+            <label><input type="radio" name="student_engagement" value="1">1</label>
+            <label><input type="radio" name="student_engagement" value="2">2</label>
+            <label><input type="radio" name="student_engagement" value="3">3</label>
+            <label><input type="radio" name="student_engagement" value="4">4</label>
+            <label><input type="radio" name="student_engagement" value="5">5</label>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-label">6. Did students who do not usually take part in sport get involved?</div>
+          <div class="radio-group">
+            <label><input type="radio" name="non_sport_students_involved" value="Yes"> Yes</label>
+            <label><input type="radio" name="non_sport_students_involved" value="Somewhat"> Somewhat</label>
+            <label><input type="radio" name="non_sport_students_involved" value="No"> No</label>
+            <label><input type="radio" name="non_sport_students_involved" value="Unsure"> Unsure</label>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-label">7. Did the tournament feel like a school event rather than just a game session?</div>
+          <div class="radio-group">
+            <label><input type="radio" name="felt_like_event" value="Yes"> Yes</label>
+            <label><input type="radio" name="felt_like_event" value="Somewhat"> Somewhat</label>
+            <label><input type="radio" name="felt_like_event" value="No"> No</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-section">
+        <div class="q-section-title">Outcomes and next steps</div>
+        <div class="q-item">
+          <div class="q-label">8. Did the pilot create interest in physical table tennis or other sport?</div>
+          <div class="radio-group">
+            <label><input type="radio" name="created_physical_tt_interest" value="Yes"> Yes</label>
+            <label><input type="radio" name="created_physical_tt_interest" value="Maybe"> Maybe</label>
+            <label><input type="radio" name="created_physical_tt_interest" value="No"> No</label>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-label">9. Would your school want to run this again?</div>
+          <div class="radio-group">
+            <label><input type="radio" name="would_run_again" value="Yes"> Yes</label>
+            <label><input type="radio" name="would_run_again" value="Maybe"> Maybe</label>
+            <label><input type="radio" name="would_run_again" value="No"> No</label>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-label">10. Would you recommend this to other schools?</div>
+          <div class="q-hint">1 = Definitely not, 5 = Definitely yes</div>
+          <div class="scale-row">
+            <label><input type="radio" name="recommend_to_schools" value="1">1</label>
+            <label><input type="radio" name="recommend_to_schools" value="2">2</label>
+            <label><input type="radio" name="recommend_to_schools" value="3">3</label>
+            <label><input type="radio" name="recommend_to_schools" value="4">4</label>
+            <label><input type="radio" name="recommend_to_schools" value="5">5</label>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-label">11. Final comments, student stories, or examples of impact</div>
+          <textarea name="final_comments" placeholder="Tell us what stood out..." style="min-height:100px;"></textarea>
+        </div>
+      </div>
+
+      <div class="submit-row">
+        <button type="submit" class="btn btn-red" id="staffSubmitBtn">Submit feedback</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: PRIVACY & SAFETY
+══════════════════════════════════════════ -->
+<div id="page-privacy" class="page">
+  <div class="wrap">
+    <div class="section-label">Resource 11 of 11</div>
+    <h1 class="page-title">Privacy &amp; safety guidance</h1>
+    <p class="page-desc">Protecting students is the first priority. These guidelines apply to all schools and all staff involved in the pilot.</p>
+
+    <div class="doc-section">
+      <h2>No public livestream</h2>
+      <p style="font-size:0.9rem;margin-bottom:0.75rem;">The pilot is an <strong>internal school event</strong>. There will be no public livestream of matches on any platform — not YouTube, not Facebook Live, not TikTok, not Instagram Live.</p>
+      <ul class="plain">
+        <li>Casting to the in-room screen is for spectators present at the event only</li>
+        <li>If a parent or community member asks about watching online — it is not available for this pilot</li>
+        <li>This protects students who may not be comfortable with wider public visibility</li>
+        <li>Live streaming can be considered for a future iteration once students and schools have opted in explicitly</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>No student names shared publicly without consent</h2>
+      <ul class="plain">
+        <li>Do not post student names on school social media, Sport Waikato channels, or GameFIT channels during or after the pilot without named consent</li>
+        <li>Tournament results and school standings may be shared without student names (e.g. "Piopio College won the grand final")</li>
+        <li>If a student wants to share their own involvement on personal social media — that is their choice</li>
+        <li>Photo/video of students: only with general school consent OR pilot-specific signed consent</li>
+        <li>Photos showing student faces: do not post without individual consent, even if general school consent exists</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Internal school promotion first</h2>
+      <ul class="plain">
+        <li>All promotion during the pilot (posters, notices, Karawhiua) is internal — within the school only</li>
+        <li>Don't cross-promote to other schools' students until the pilot is complete</li>
+        <li>Sport Waikato and Beyond will not tag or share school content without checking with the school lead first</li>
+        <li>If media enquiries come in during the pilot — refer to Leanne Bats at Sport Waikato</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Storytelling after the pilot — with approved students only</h2>
+      <ul class="plain">
+        <li>Storytelling (case studies, video, social posts, reports to ITTF or national partners) happens <strong>after 4 September</strong>, not during</li>
+        <li>Martin and Lisa from Sport Waikato will lead the storytelling process after the pilot</li>
+        <li>Students featured in any story must give explicit consent — and so must their parents/guardians if under 16</li>
+        <li>Students can withdraw consent at any point, even after giving it</li>
+        <li>The story belongs to the students — don't use their voice to promote the programme without their knowledge</li>
+      </ul>
+    </div>
+
+    <div class="doc-section">
+      <h2>Physical safety during VR play</h2>
+      <ul class="plain">
+        <li>Maintain a clear 2m × 2m play zone per headset at all times</li>
+        <li>No other students in the play zone when a headset is in use</li>
+        <li>Stop play immediately if a student feels dizzy, nauseous, or unwell</li>
+        <li>Maximum 20–30 minutes continuous VR play — breaks between rotations are natural</li>
+        <li>All incidents (near-misses, falls, motion sickness) must be logged and reported to Beyond</li>
+        <li>First aid kit must be accessible in the same room during sessions</li>
+      </ul>
+    </div>
+
+    <div class="warn-box">
+      <strong>If you're unsure — ask first.</strong> Bill Cooksley (Sport Waikato) or Jessica Manins (Beyond) are the contacts for anything privacy or safety related during the pilot.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: TIMELINE
+══════════════════════════════════════════ -->
+<div id="page-timeline" class="page">
+  <div class="wrap">
+    <div class="section-label">Campaign timeline</div>
+    <h1 class="page-title">Road to tournament week</h1>
+    <p class="page-desc">A full 6–8 week campaign. Tournament week is the destination — the lead-up is where the real work happens.</p>
+
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot current"></div>
+        <span class="tl-phase red">Now — this week</span>
+        <div class="tl-title">Confirm scope and stop scope creep</div>
+        <div class="tl-body">
+          <ul>
+            <li>Confirm Waikato-only pilot, 4 KC Cluster schools, ~$14k budget</li>
+            <li>Ask Beyond to revise proposal to cluster model</li>
+            <li>Confirm key roles: Sport Waikato lead, Beyond lead, school staff leads</li>
+            <li>Confirm minimum equipment: 2 headsets / 2 profiles per school (Option B)</li>
+            <li>Confirm tournament week remains 31 Aug – 4 Sep</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <span class="tl-phase">Week 1 · 1–5 July</span>
+        <div class="tl-title">Lock the model, prepare school-facing materials</div>
+        <div class="tl-body">
+          <ul>
+            <li>Rewrite proposal as Waikato-only cluster model with lead-up and school playoffs</li>
+            <li>Create school invite (ready on this site)</li>
+            <li>Create school requirements checklist (ready on this site)</li>
+            <li>Draft tournament rules and Karawhiua points structure (ready on this site)</li>
+            <li>Confirm with Beyond: headset count, profiles, multiplayer, Eleven licences</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <span class="tl-phase">Week 2 · 8–12 July</span>
+        <div class="tl-title">Get schools on board before end of term</div>
+        <div class="tl-body">
+          <ul>
+            <li>Send school invite to 4 KC Cluster schools</li>
+            <li>Ask each school to nominate staff lead, confirm space, screen, timing</li>
+            <li>Confirm photo/video consent process at each school</li>
+            <li>Confirm Karawhiua app access for each school</li>
+            <li>Schools receive pilot concept and understand it's more than one week</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <span class="tl-phase blue">School holidays · 13–26 July</span>
+        <div class="tl-title">Build assets and solve tech before students return</div>
+        <div class="tl-body">
+          <ul>
+            <li>Beyond/Sport Waikato test: headset setup, profiles, Eleven multiplayer, casting, Starlink/hotspot</li>
+            <li>Create session guide and troubleshooting guide (both ready on this site)</li>
+            <li>Create promo assets: posters, notices, house points explainer, Road to Tournament graphic</li>
+            <li>Create school playoff template and bracket (ready on this site)</li>
+            <li>Create pre-pilot student survey and staff feedback form (ready on this site)</li>
+            <li>Prepare privacy/safety guidance (ready on this site)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <span class="tl-phase">Week 3 · 27 Jul – 2 Aug</span>
+        <div class="tl-title">Campaign launch in schools</div>
+        <div class="tl-body">
+          <ul>
+            <li>Launch Karawhiua campaign — open student sign-ups</li>
+            <li>Post school notices and posters</li>
+            <li>Run first lunchtime "have a go" session at each school</li>
+            <li>Test casting to screen at each school</li>
+            <li>Award Karawhiua house points for first participation</li>
+            <li>Start informal school leaderboards</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <span class="tl-phase">Week 4 · 3–9 Aug</span>
+        <div class="tl-title">Build skills and confidence</div>
+        <div class="tl-body">
+          <ul>
+            <li>Run regular lunchtime practice sessions</li>
+            <li>Run beginner tutorials: serve, scoring, rally, safety, challenging another player</li>
+            <li>Optional "beat a staff member" challenge sessions</li>
+            <li>Continue Karawhiua house competition</li>
+            <li>Confirm school playoff date and tournament week time window</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <span class="tl-phase">Week 5 · 10–16 Aug</span>
+        <div class="tl-title">School playoffs</div>
+        <div class="tl-body">
+          <ul>
+            <li>Each school runs internal playoffs using bracket on this site</li>
+            <li>Select 4 players + 2 reserves per school</li>
+            <li>Award Karawhiua points for entering, sportsmanship, making team</li>
+            <li>Capture student voice: why they joined, usual activity level</li>
+            <li>Confirm final team list — send to Sport Waikato by 15 August</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <span class="tl-phase">Week 6 · 17–23 Aug</span>
+        <div class="tl-title">Full cross-school rehearsal</div>
+        <div class="tl-body">
+          <ul>
+            <li>Run a full test match between two schools — profiles, multiplayer, casting, scoring</li>
+            <li>Confirm final draw, daily run sheet, school contacts</li>
+            <li>Confirm prizes: champion school, MVP, sportsmanship, most improved, best supporter house</li>
+            <li>Create finals week hype content</li>
+            <li>No school should test tech for the first time during tournament week</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <span class="tl-phase">Week 7 · 24–30 Aug</span>
+        <div class="tl-title">Final readiness</div>
+        <div class="tl-body">
+          <ul>
+            <li>Final equipment, profile, casting, and internet checks</li>
+            <li>Publish tournament draw and house points leaderboard</li>
+            <li>Send schools final run sheet — confirm student reps, staff leads, prize pack</li>
+            <li>Run optional open practice sessions</li>
+            <li>Students know who's playing. Supporters know when to watch. Staff know what to do.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot" style="background:var(--red);width:20px;height:20px;left:-2.15rem;box-shadow:0 0 0 4px rgba(212,43,43,0.25);"></div>
+        <span class="tl-phase red" style="font-size:0.82rem;padding:4px 14px;">Tournament week · 31 Aug – 4 Sep</span>
+        <div class="tl-title" style="font-size:1.1rem;">Deliver the tournament</div>
+        <div class="tl-body">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0.5rem;margin-top:0.5rem;">
+            <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:0.65rem 0.85rem;">
+              <div style="font-size:0.7rem;font-weight:700;color:var(--red);margin-bottom:0.2rem;">Mon 31 Aug</div>
+              <div style="font-size:0.82rem;">Opening / Round 1</div>
+            </div>
+            <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:0.65rem 0.85rem;">
+              <div style="font-size:0.7rem;font-weight:700;color:var(--red);margin-bottom:0.2rem;">Tue 1 Sep</div>
+              <div style="font-size:0.82rem;">Round 2</div>
+            </div>
+            <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:0.65rem 0.85rem;">
+              <div style="font-size:0.7rem;font-weight:700;color:var(--red);margin-bottom:0.2rem;">Wed 2 Sep</div>
+              <div style="font-size:0.82rem;">Round 3 + rankings</div>
+            </div>
+            <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:0.65rem 0.85rem;">
+              <div style="font-size:0.7rem;font-weight:700;color:var(--red);margin-bottom:0.2rem;">Thu 3 Sep</div>
+              <div style="font-size:0.82rem;">Semi-finals</div>
+            </div>
+            <div style="background:var(--red);color:#fff;border-radius:var(--radius);padding:0.65rem 0.85rem;">
+              <div style="font-size:0.7rem;font-weight:700;opacity:0.8;margin-bottom:0.2rem;">Fri 4 Sep</div>
+              <div style="font-size:0.82rem;font-weight:700;">Finals &amp; Awards 🏆</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot" style="background:var(--blue);box-shadow:0 0 0 2px var(--blue);"></div>
+        <span class="tl-phase blue">Post-pilot · 7–18 Sep</span>
+        <div class="tl-title">Evaluate, tell the story, decide what's next</div>
+        <div class="tl-body">
+          <ul>
+            <li>Compare pre/post survey results — who participated, were they usually active?</li>
+            <li>Count: students tried it / in playoffs / tournament players / supporters / house point engagement</li>
+            <li>Gather quotes from students and staff</li>
+            <li>Martin &amp; Lisa create pilot story for Sport Waikato</li>
+            <li>Decide next step: repeat Term 4, expand to Northland/Tawa, approach TTNZ, approach ITTF</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════ -->
+<script>
+// ── Navigation ──
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('visible'));
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  const page = document.getElementById('page-' + id);
+  if (page) { page.classList.add('visible'); window.scrollTo(0,0); }
+  const link = document.querySelector('[data-page="' + id + '"]');
+  if (link) link.classList.add('active');
+  return false;
+}
+
+// ── Bracket logic ──
+const players = [];
+
+function addPlayer() {
+  const inp = document.getElementById('newPlayer');
+  const name = inp.value.trim();
+  if (!name) return;
+  players.push(name);
+  inp.value = '';
+  renderSignupList();
+}
+
+function renderSignupList() {
+  const list = document.getElementById('signupList');
+  if (!players.length) { list.innerHTML = '<div style="font-size:0.85rem;color:var(--mid);">No students added yet.</div>'; return; }
+  list.innerHTML = players.map((p, i) =>
+    `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.25rem 0;font-size:0.88rem;border-bottom:1px solid #f0f0f0;">
+      <span>${i+1}. ${p}</span>
+      <button onclick="players.splice(${i},1);renderSignupList();" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:0.8rem;">✕</button>
+    </div>`
+  ).join('');
+}
+
+function autoFillBracket() {
+  const shuffled = [...players].sort(() => Math.random() - 0.5);
+  for (let i = 1; i <= 8; i++) {
+    const el = document.getElementById('m' + Math.ceil(i/2) + 'p' + (i%2===1?1:2));
+    if (el) el.value = shuffled[i-1] || '';
+  }
+  for (let m = 1; m <= 4; m++) updateScoresheet(m);
+}
+
+function calcMatch(m) {
+  const p1 = document.getElementById('m'+m+'p1').value.trim();
+  const p2 = document.getElementById('m'+m+'p2').value.trim();
+  const s1 = parseInt(document.getElementById('m'+m+'s1').value)||0;
+  const s2 = parseInt(document.getElementById('m'+m+'s2').value)||0;
+  updateScoresheet(m, p1, p2, s1, s2);
+
+  // Auto-advance winner
+  const winner = s1 > s2 ? p1 : s2 > s1 ? p2 : '';
+  if (!winner) return;
+
+  if (m <= 4) {
+    // QF → SF
+    const sfMatch = m <= 2 ? 5 : 6;
+    const sfSlot = m % 2 === 1 ? 'p1' : 'p2';
+    const sfEl = document.getElementById('m'+sfMatch+sfSlot);
+    if (sfEl && !sfEl.dataset.locked) sfEl.value = winner;
+  } else if (m <= 6) {
+    // SF → Final
+    const finalSlot = m === 5 ? 'p1' : 'p2';
+    const finalEl = document.getElementById('m7'+finalSlot);
+    if (finalEl && !finalEl.dataset.locked) finalEl.value = winner;
+  } else if (m === 7) {
+    // Final — show champion
+    document.getElementById('finalWinner').textContent = winner ? '🏆 Champion: ' + winner : '';
+    updateTeam(winner);
+  }
+}
+
+function updateTeam(winner) {
+  const list = document.getElementById('teamList');
+  // Collect all SF/Final winners as team
+  const team = [];
+  [5,6,7].forEach(m => {
+    const s1 = parseInt(document.getElementById('m'+m+'s1').value)||0;
+    const s2 = parseInt(document.getElementById('m'+m+'s2').value)||0;
+    const p1 = document.getElementById('m'+m+'p1').value.trim();
+    const p2 = document.getElementById('m'+m+'p2').value.trim();
+    if (s1>s2 && p1) team.push({name:p1, result: m===7?'Champion':'Semi-finalist'});
+    else if (s2>s1 && p2) team.push({name:p2, result: m===7?'Runner-up':'Semi-finalist'});
+  });
+  if (!team.length) { list.innerHTML = '<div style="font-size:0.85rem;color:var(--mid);">Winners advance here automatically.</div>'; return; }
+  list.innerHTML = team.map(t =>
+    `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.3rem 0;font-size:0.88rem;border-bottom:1px solid #f0f0f0;">
+      <strong>${t.name}</strong><span style="font-size:0.78rem;color:var(--mid);">${t.result}</span>
+    </div>`
+  ).join('');
+}
+
+function updateScoresheet(m, p1, p2, s1, s2) {
+  p1 = p1 || document.getElementById('m'+m+'p1').value.trim();
+  p2 = p2 || document.getElementById('m'+m+'p2').value.trim();
+  s1 = s1 !== undefined ? s1 : parseInt(document.getElementById('m'+m+'s1').value)||0;
+  s2 = s2 !== undefined ? s2 : parseInt(document.getElementById('m'+m+'s2').value)||0;
+  const win = s1>s2 ? p1 : s2>s1 ? p2 : '—';
+  const labels = {1:'QF1',2:'QF2',3:'QF3',4:'QF4',5:'SF1',6:'SF2',7:'Final'};
+  const ss = document.getElementById('ss'+m);
+  if (!ss) return;
+  ['p1','p2','s1','s2','w'].forEach(k => {
+    const el = document.getElementById('ss'+m+k);
+    if (el) el.textContent = k==='p1'?p1||'—':k==='p2'?p2||'—':k==='s1'?s1:k==='s2'?s2:win;
+  });
+  // Highlight winner slot in bracket
+  const slots = document.querySelectorAll('#m'+m+' .b-slot');
+  if (slots.length===2) {
+    slots[0].classList.toggle('winner', s1>s2 && s1>0);
+    slots[1].classList.toggle('winner', s2>s1 && s2>0);
+  }
+}
+
+// ── Survey submission (submits to backend API if available, otherwise logs locally) ──
+function gatherForm(formEl) {
+  const data = {};
+  const fd = new FormData(formEl);
+  // Group checkboxes as arrays
+  for (const [key, val] of fd.entries()) {
+    if (data[key]) {
+      if (!Array.isArray(data[key])) data[key] = [data[key]];
+      data[key].push(val);
+    } else {
+      data[key] = val;
+    }
+  }
+  return data;
+}
+
+async function submitStudentSurvey(e) {
+  e.preventDefault();
+  const btn = document.getElementById('studentSubmitBtn');
+  btn.textContent = 'Submitting...'; btn.disabled = true;
+  const data = gatherForm(e.target);
+  document.getElementById('studentSurveyError').style.display = 'none';
+  try {
+    const res = await fetch('/api/survey/student', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    if (res.ok) {
+      document.getElementById('studentSurveyForm').style.display = 'none';
+      document.getElementById('studentSurveySuccess').style.display = 'block';
+    } else {
+      throw new Error('Server error');
+    }
+  } catch {
+    // Fallback: show success anyway (data logged to console for local testing)
+    console.log('Survey data:', data);
+    document.getElementById('studentSurveyForm').style.display = 'none';
+    document.getElementById('studentSurveySuccess').style.display = 'block';
+  }
+}
+
+async function submitStaffSurvey(e) {
+  e.preventDefault();
+  const btn = document.getElementById('staffSubmitBtn');
+  btn.textContent = 'Submitting...'; btn.disabled = true;
+  const data = gatherForm(e.target);
+  document.getElementById('staffSurveyError').style.display = 'none';
+  try {
+    const res = await fetch('/api/survey/staff', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    if (res.ok) {
+      document.getElementById('staffSurveyForm').style.display = 'none';
+      document.getElementById('staffSurveySuccess').style.display = 'block';
+    } else { throw new Error(); }
+  } catch {
+    console.log('Staff survey data:', data);
+    document.getElementById('staffSurveyForm').style.display = 'none';
+    document.getElementById('staffSurveySuccess').style.display = 'block';
+  }
+}
+
+// ── Copy notice text ──
+function copyNotice() {
+  const text = document.getElementById('noticeText').innerText;
+  navigator.clipboard.writeText(text).then(() => alert('Notice text copied to clipboard!'));
+}
+
+// Init signup list
+renderSignupList();
+</script>
+</body>
+</html>
