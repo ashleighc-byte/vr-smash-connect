@@ -3,27 +3,22 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "Eleven VR Table Tennis — Waikato KC Cluster Pilot" },
+      { name: "description", content: "Sport Waikato × Beyond VR Table Tennis interschool pilot — Piopio, Taumarunui, Ōtorohanga and Te Kuiti, tournament week 31 Aug – 4 Sep 2025." },
     ],
   }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
+  if (typeof window !== "undefined") {
+    window.location.replace("/site.html");
+  }
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#1a1a1a", color: "#f5f5f5", fontFamily: "system-ui, sans-serif" }}>
+      <a href="/site.html" style={{ color: "#d42b2b", fontWeight: 700, textDecoration: "none" }}>
+        Enter site →
+      </a>
     </div>
   );
 }
