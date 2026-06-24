@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiSurveyStudentRouteImport } from './routes/api/survey.student'
+import { Route as ApiSurveyStaffRouteImport } from './routes/api/survey.staff'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,30 +23,39 @@ const ApiSurveyStudentRoute = ApiSurveyStudentRouteImport.update({
   path: '/api/survey/student',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSurveyStaffRoute = ApiSurveyStaffRouteImport.update({
+  id: '/api/survey/staff',
+  path: '/api/survey/staff',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/survey/staff': typeof ApiSurveyStaffRoute
   '/api/survey/student': typeof ApiSurveyStudentRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/survey/staff': typeof ApiSurveyStaffRoute
   '/api/survey/student': typeof ApiSurveyStudentRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/survey/staff': typeof ApiSurveyStaffRoute
   '/api/survey/student': typeof ApiSurveyStudentRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/survey/student'
+  fullPaths: '/' | '/api/survey/staff' | '/api/survey/student'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/survey/student'
-  id: '__root__' | '/' | '/api/survey/student'
+  to: '/' | '/api/survey/staff' | '/api/survey/student'
+  id: '__root__' | '/' | '/api/survey/staff' | '/api/survey/student'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiSurveyStaffRoute: typeof ApiSurveyStaffRoute
   ApiSurveyStudentRoute: typeof ApiSurveyStudentRoute
 }
 
@@ -65,11 +75,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSurveyStudentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/survey/staff': {
+      id: '/api/survey/staff'
+      path: '/api/survey/staff'
+      fullPath: '/api/survey/staff'
+      preLoaderRoute: typeof ApiSurveyStaffRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiSurveyStaffRoute: ApiSurveyStaffRoute,
   ApiSurveyStudentRoute: ApiSurveyStudentRoute,
 }
 export const routeTree = rootRouteImport
