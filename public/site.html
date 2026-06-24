@@ -636,7 +636,7 @@
       <li><a href="#" onclick="showPage('session')" data-page="session">Session guide</a></li>
       <li><a href="#" onclick="showPage('trouble')" data-page="trouble">Troubleshooting</a></li>
       <li><a href="#" onclick="showPage('promo')" data-page="promo">Promo assets</a></li>
-      <li><a href="#" onclick="showPage('bracket')" data-page="bracket">Bracket</a></li>
+      <li><a href="/school-bracket">Bracket</a></li>
       <li><a href="#" onclick="showPage('survey-student')" data-page="survey-student">Student survey</a></li>
       <li><a href="#" onclick="showPage('survey-staff')" data-page="survey-staff">Staff survey</a></li>
       <li><a href="#" onclick="showPage('privacy')" data-page="privacy">Privacy</a></li>
@@ -1544,92 +1544,18 @@
      PAGE: PLAYOFF BRACKET
 ══════════════════════════════════════════ -->
 <div id="page-bracket" class="page">
-  <div class="wrap-wide">
+  <div class="wrap" style="text-align:center;padding:4rem 1.25rem;">
     <div class="section-label">Resource 9 of 11</div>
     <h1 class="page-title">School playoff bracket</h1>
-    <p class="page-desc">Fill in player names and scores below. Winners auto-advance to the next round when you enter their scores. Use this for your school's internal playoffs to select tournament reps.</p>
-
-    <div style="display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;">
-      <div class="doc-section" style="flex:1;min-width:200px;margin-bottom:0;">
-        <h2 style="margin-bottom:0.5rem;">Sign-up sheet</h2>
-        <div id="signupList" style="margin-bottom:0.75rem;"></div>
-        <div style="display:flex;gap:0.5rem;">
-          <input type="text" id="newPlayer" placeholder="Student name" style="flex:1;" onkeydown="if(event.key==='Enter')addPlayer()">
-          <button class="btn btn-red btn-sm" onclick="addPlayer()">Add</button>
-        </div>
-        <button class="btn btn-sm" style="background:var(--off);color:var(--black);margin-top:0.5rem;width:100%;" onclick="autoFillBracket()">Fill bracket →</button>
-      </div>
-      <div class="doc-section" style="flex:1;min-width:200px;margin-bottom:0;">
-        <h2>Team selected</h2>
-        <div id="teamList">
-          <div style="font-size:0.85rem;color:var(--mid);">Winners advance here automatically.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="bracket-wrap">
-      <div class="bracket" id="bracket">
-        <!-- Round 1 -->
-        <div class="b-round">
-          <div class="b-round-label">Round 1 — Quarter-finals</div>
-          <div class="b-match" id="m1">
-            <div class="b-slot"><input type="text" placeholder="Player 1" id="m1p1" oninput="calcMatch(1)"><input type="number" min="0" max="11" id="m1s1" oninput="calcMatch(1)"></div>
-            <div class="b-slot"><input type="text" placeholder="Player 2" id="m1p2" oninput="calcMatch(1)"><input type="number" min="0" max="11" id="m1s2" oninput="calcMatch(1)"></div>
-          </div>
-          <div class="b-match" id="m2">
-            <div class="b-slot"><input type="text" placeholder="Player 3" id="m2p1" oninput="calcMatch(2)"><input type="number" min="0" max="11" id="m2s1" oninput="calcMatch(2)"></div>
-            <div class="b-slot"><input type="text" placeholder="Player 4" id="m2p2" oninput="calcMatch(2)"><input type="number" min="0" max="11" id="m2s2" oninput="calcMatch(2)"></div>
-          </div>
-          <div class="b-match" id="m3">
-            <div class="b-slot"><input type="text" placeholder="Player 5" id="m3p1" oninput="calcMatch(3)"><input type="number" min="0" max="11" id="m3s1" oninput="calcMatch(3)"></div>
-            <div class="b-slot"><input type="text" placeholder="Player 6" id="m3p2" oninput="calcMatch(3)"><input type="number" min="0" max="11" id="m3s2" oninput="calcMatch(3)"></div>
-          </div>
-          <div class="b-match" id="m4">
-            <div class="b-slot"><input type="text" placeholder="Player 7" id="m4p1" oninput="calcMatch(4)"><input type="number" min="0" max="11" id="m4s1" oninput="calcMatch(4)"></div>
-            <div class="b-slot"><input type="text" placeholder="Player 8" id="m4p2" oninput="calcMatch(4)"><input type="number" min="0" max="11" id="m4s2" oninput="calcMatch(4)"></div>
-          </div>
-        </div>
-
-        <!-- Semi-finals -->
-        <div class="b-round" style="justify-content:space-around;">
-          <div class="b-round-label">Semi-finals</div>
-          <div class="b-match" id="m5">
-            <div class="b-slot"><input type="text" placeholder="Winner M1" id="m5p1" oninput="calcMatch(5)"><input type="number" min="0" max="11" id="m5s1" oninput="calcMatch(5)"></div>
-            <div class="b-slot"><input type="text" placeholder="Winner M2" id="m5p2" oninput="calcMatch(5)"><input type="number" min="0" max="11" id="m5s2" oninput="calcMatch(5)"></div>
-          </div>
-          <div class="b-match" id="m6">
-            <div class="b-slot"><input type="text" placeholder="Winner M3" id="m6p1" oninput="calcMatch(6)"><input type="number" min="0" max="11" id="m6s1" oninput="calcMatch(6)"></div>
-            <div class="b-slot"><input type="text" placeholder="Winner M4" id="m6p2" oninput="calcMatch(6)"><input type="number" min="0" max="11" id="m6s2" oninput="calcMatch(6)"></div>
-          </div>
-        </div>
-
-        <!-- Final -->
-        <div class="b-round" style="justify-content:center;">
-          <div class="b-round-label">Grand final</div>
-          <div class="b-match" id="m7">
-            <div class="b-slot"><input type="text" placeholder="Semi 1 winner" id="m7p1" oninput="calcMatch(7)"><input type="number" min="0" max="11" id="m7s1" oninput="calcMatch(7)"></div>
-            <div class="b-slot"><input type="text" placeholder="Semi 2 winner" id="m7p2" oninput="calcMatch(7)"><input type="number" min="0" max="11" id="m7s2" oninput="calcMatch(7)"></div>
-          </div>
-          <div id="finalWinner" style="margin-top:0.75rem;font-weight:700;font-size:0.95rem;color:var(--red);text-align:center;"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="doc-section" style="margin-top:1.5rem;">
-      <h2>Scoring sheet</h2>
-      <table class="schedule-table" id="scoringSheet">
-        <thead><tr><th>Match</th><th>Player 1</th><th>Score</th><th>Player 2</th><th>Score</th><th>Winner</th></tr></thead>
-        <tbody id="scoringBody">
-          <tr><td>QF1</td><td id="ss1p1">—</td><td id="ss1s1">—</td><td id="ss1p2">—</td><td id="ss1s2">—</td><td id="ss1w">—</td></tr>
-          <tr><td>QF2</td><td id="ss2p1">—</td><td id="ss2s1">—</td><td id="ss2p2">—</td><td id="ss2s2">—</td><td id="ss2w">—</td></tr>
-          <tr><td>QF3</td><td id="ss3p1">—</td><td id="ss3s1">—</td><td id="ss3p2">—</td><td id="ss3s2">—</td><td id="ss3w">—</td></tr>
-          <tr><td>QF4</td><td id="ss4p1">—</td><td id="ss4s1">—</td><td id="ss4p2">—</td><td id="ss4s2">—</td><td id="ss4w">—</td></tr>
-          <tr><td>SF1</td><td id="ss5p1">—</td><td id="ss5s1">—</td><td id="ss5p2">—</td><td id="ss5s2">—</td><td id="ss5w">—</td></tr>
-          <tr><td>SF2</td><td id="ss6p1">—</td><td id="ss6s1">—</td><td id="ss6p2">—</td><td id="ss6s2">—</td><td id="ss6w">—</td></tr>
-          <tr class="finals"><td>Final</td><td id="ss7p1">—</td><td id="ss7s1">—</td><td id="ss7p2">—</td><td id="ss7s2">—</td><td id="ss7w">—</td></tr>
-        </tbody>
-      </table>
-    </div>
+    <p style="font-size:1rem;color:var(--mid);margin-bottom:2rem;">
+      The bracket tool has been upgraded — open it in the new dashboard.
+    </p>
+    <a href="/school-bracket" class="btn btn-red" style="display:inline-block;padding:0.85rem 2rem;font-size:1rem;text-decoration:none;">
+      Open Bracket Generator →
+    </a>
+    <p style="margin-top:1.5rem;font-size:0.85rem;color:var(--mid);">
+      Add players, generate brackets, and save scores to Supabase.
+    </p>
   </div>
 </div>
 
@@ -2327,38 +2253,8 @@ function showPage(id) {
   return false;
 }
 
-// ── Bracket logic ──
-const players = [];
-
-function addPlayer() {
-  const inp = document.getElementById('newPlayer');
-  const name = inp.value.trim();
-  if (!name) return;
-  players.push(name);
-  inp.value = '';
-  renderSignupList();
-}
-
-function renderSignupList() {
-  const list = document.getElementById('signupList');
-  if (!players.length) { list.innerHTML = '<div style="font-size:0.85rem;color:var(--mid);">No students added yet.</div>'; return; }
-  list.innerHTML = players.map((p, i) =>
-    `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.25rem 0;font-size:0.88rem;border-bottom:1px solid #f0f0f0;">
-      <span>${i+1}. ${p}</span>
-      <button onclick="players.splice(${i},1);renderSignupList();" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:0.8rem;">✕</button>
-    </div>`
-  ).join('');
-}
-
-function autoFillBracket() {
-  const shuffled = [...players].sort(() => Math.random() - 0.5);
-  for (let i = 1; i <= 8; i++) {
-    const el = document.getElementById('m' + Math.ceil(i/2) + 'p' + (i%2===1?1:2));
-    if (el) el.value = shuffled[i-1] || '';
-  }
-  for (let m = 1; m <= 4; m++) updateScoresheet(m);
-}
-
+// ── Bracket logic (stubs for old static bracket — bracket now uses React at /school-bracket) ──
+function renderSignupList() { /* no-op — replaced by React component */ }
 function calcMatch(m) {
   const p1 = document.getElementById('m'+m+'p1').value.trim();
   const p2 = document.getElementById('m'+m+'p2').value.trim();
@@ -2606,8 +2502,6 @@ async function loadStandings() {
   };
 })();
 
-// Init signup list
-renderSignupList();
 </script>
 </body>
 </html>

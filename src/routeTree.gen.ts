@@ -9,27 +9,29 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AdminRosterRouteImport } from './routes/admin.roster'
-import { Route as AdminScoresRouteImport } from './routes/admin.scores'
-import { Route as IndexRouteImport } from './routes/index'
 import { Route as StandingsRouteImport } from './routes/standings'
+import { Route as SchoolBracketRouteImport } from './routes/school-bracket'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiMatch_resultsRouteImport } from './routes/api/match_results'
+import { Route as AdminScoresRouteImport } from './routes/admin.scores'
+import { Route as AdminRosterRouteImport } from './routes/admin.roster'
 import { Route as ApiSurveyStudentRouteImport } from './routes/api/survey.student'
 import { Route as ApiSurveyStaffRouteImport } from './routes/api/survey.staff'
 
+const StandingsRoute = StandingsRouteImport.update({
+  id: '/standings',
+  path: '/standings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SchoolBracketRoute = SchoolBracketRouteImport.update({
+  id: '/school-bracket',
+  path: '/school-bracket',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRosterRoute = AdminRosterRouteImport.update({
-  id: '/admin/roster',
-  path: '/admin/roster',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminScoresRoute = AdminScoresRouteImport.update({
-  id: '/admin/scores',
-  path: '/admin/scores',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -37,10 +39,20 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StandingsRoute = StandingsRouteImport.update({
-  id: '/standings',
-  path: '/standings',
+const ApiMatch_resultsRoute = ApiMatch_resultsRouteImport.update({
+  id: '/api/match_results',
+  path: '/api/match_results',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminScoresRoute = AdminScoresRouteImport.update({
+  id: '/scores',
+  path: '/scores',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRosterRoute = AdminRosterRouteImport.update({
+  id: '/roster',
+  path: '/roster',
+  getParentRoute: () => AdminRoute,
 } as any)
 const ApiSurveyStudentRoute = ApiSurveyStudentRouteImport.update({
   id: '/api/survey/student',
@@ -55,71 +67,105 @@ const ApiSurveyStaffRoute = ApiSurveyStaffRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/school-bracket': typeof SchoolBracketRoute
+  '/standings': typeof StandingsRoute
   '/admin/roster': typeof AdminRosterRoute
   '/admin/scores': typeof AdminScoresRoute
-  '/standings': typeof StandingsRoute
+  '/api/match_results': typeof ApiMatch_resultsRoute
   '/api/survey/staff': typeof ApiSurveyStaffRoute
   '/api/survey/student': typeof ApiSurveyStudentRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/school-bracket': typeof SchoolBracketRoute
+  '/standings': typeof StandingsRoute
   '/admin/roster': typeof AdminRosterRoute
   '/admin/scores': typeof AdminScoresRoute
-  '/standings': typeof StandingsRoute
+  '/api/match_results': typeof ApiMatch_resultsRoute
   '/api/survey/staff': typeof ApiSurveyStaffRoute
   '/api/survey/student': typeof ApiSurveyStudentRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/school-bracket': typeof SchoolBracketRoute
+  '/standings': typeof StandingsRoute
   '/admin/roster': typeof AdminRosterRoute
   '/admin/scores': typeof AdminScoresRoute
-  '/standings': typeof StandingsRoute
+  '/api/match_results': typeof ApiMatch_resultsRoute
   '/api/survey/staff': typeof ApiSurveyStaffRoute
   '/api/survey/student': typeof ApiSurveyStudentRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/admin/roster' | '/admin/scores' | '/standings' | '/api/survey/staff' | '/api/survey/student'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/school-bracket'
+    | '/standings'
+    | '/admin/roster'
+    | '/admin/scores'
+    | '/api/match_results'
+    | '/api/survey/staff'
+    | '/api/survey/student'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/admin/roster' | '/admin/scores' | '/standings' | '/api/survey/staff' | '/api/survey/student'
-  id: '__root__' | '/' | '/admin' | '/admin/roster' | '/admin/scores' | '/kek' | '/api/survey/staff' | '/api/survey/student'
+  to:
+    | '/'
+    | '/admin'
+    | '/school-bracket'
+    | '/standings'
+    | '/admin/roster'
+    | '/admin/scores'
+    | '/api/match_results'
+    | '/api/survey/staff'
+    | '/api/survey/student'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/school-bracket'
+    | '/standings'
+    | '/admin/roster'
+    | '/admin/scores'
+    | '/api/match_results'
+    | '/api/survey/staff'
+    | '/api/survey/student'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
-  AdminRosterRoute: typeof AdminRosterRoute
-  AdminScoresRoute: typeof AdminScoresRoute
+  AdminRoute: typeof AdminRouteWithChildren
+  SchoolBracketRoute: typeof SchoolBracketRoute
   StandingsRoute: typeof StandingsRoute
+  ApiMatch_resultsRoute: typeof ApiMatch_resultsRoute
   ApiSurveyStaffRoute: typeof ApiSurveyStaffRoute
   ApiSurveyStudentRoute: typeof ApiSurveyStudentRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/standings': {
+      id: '/standings'
+      path: '/standings'
+      fullPath: '/standings'
+      preLoaderRoute: typeof StandingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/school-bracket': {
+      id: '/school-bracket'
+      path: '/school-bracket'
+      fullPath: '/school-bracket'
+      preLoaderRoute: typeof SchoolBracketRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/roster': {
-      id: '/admin/roster'
-      path: '/admin/roster'
-      fullPath: '/admin/roster'
-      preLoaderRoute: typeof AdminRosterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/scores': {
-      id: '/admin/scores'
-      path: '/admin/scores'
-      fullPath: '/admin/scores'
-      preLoaderRoute: typeof AdminScoresRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -129,12 +175,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/standings': {
-      id: '/standings'
-      path: '/standings'
-      fullPath: '/standings'
-      preLoaderRoute: typeof StandingsRouteImport
+    '/api/match_results': {
+      id: '/api/match_results'
+      path: '/api/match_results'
+      fullPath: '/api/match_results'
+      preLoaderRoute: typeof ApiMatch_resultsRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/scores': {
+      id: '/admin/scores'
+      path: '/scores'
+      fullPath: '/admin/scores'
+      preLoaderRoute: typeof AdminScoresRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/roster': {
+      id: '/admin/roster'
+      path: '/roster'
+      fullPath: '/admin/roster'
+      preLoaderRoute: typeof AdminRosterRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/api/survey/student': {
       id: '/api/survey/student'
@@ -153,15 +213,37 @@ declare module '@tanstack/react-router' {
   }
 }
 
-const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
+interface AdminRouteChildren {
+  AdminRosterRoute: typeof AdminRosterRoute
+  AdminScoresRoute: typeof AdminScoresRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
   AdminRosterRoute: AdminRosterRoute,
   AdminScoresRoute: AdminScoresRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
+  SchoolBracketRoute: SchoolBracketRoute,
   StandingsRoute: StandingsRoute,
+  ApiMatch_resultsRoute: ApiMatch_resultsRoute,
   ApiSurveyStaffRoute: ApiSurveyStaffRoute,
   ApiSurveyStudentRoute: ApiSurveyStudentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
