@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiMatch_resultsRouteImport } from './routes/api/match_results'
 import { Route as AdminScoresRouteImport } from './routes/admin.scores'
 import { Route as AdminRosterRouteImport } from './routes/admin.roster'
+import { Route as AdminReportRouteImport } from './routes/admin.report'
 import { Route as ApiSurveyStudentRouteImport } from './routes/api/survey.student'
 import { Route as ApiSurveyStaffRouteImport } from './routes/api/survey.staff'
 
@@ -54,6 +55,11 @@ const AdminRosterRoute = AdminRosterRouteImport.update({
   path: '/roster',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminReportRoute = AdminReportRouteImport.update({
+  id: '/report',
+  path: '/report',
+  getParentRoute: () => AdminRoute,
+} as any)
 const ApiSurveyStudentRoute = ApiSurveyStudentRouteImport.update({
   id: '/api/survey/student',
   path: '/api/survey/student',
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/school-bracket': typeof SchoolBracketRoute
   '/standings': typeof StandingsRoute
+  '/admin/report': typeof AdminReportRoute
   '/admin/roster': typeof AdminRosterRoute
   '/admin/scores': typeof AdminScoresRoute
   '/api/match_results': typeof ApiMatch_resultsRoute
@@ -81,6 +88,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRouteWithChildren
   '/school-bracket': typeof SchoolBracketRoute
   '/standings': typeof StandingsRoute
+  '/admin/report': typeof AdminReportRoute
   '/admin/roster': typeof AdminRosterRoute
   '/admin/scores': typeof AdminScoresRoute
   '/api/match_results': typeof ApiMatch_resultsRoute
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/school-bracket': typeof SchoolBracketRoute
   '/standings': typeof StandingsRoute
+  '/admin/report': typeof AdminReportRoute
   '/admin/roster': typeof AdminRosterRoute
   '/admin/scores': typeof AdminScoresRoute
   '/api/match_results': typeof ApiMatch_resultsRoute
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/school-bracket'
     | '/standings'
+    | '/admin/report'
     | '/admin/roster'
     | '/admin/scores'
     | '/api/match_results'
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/school-bracket'
     | '/standings'
+    | '/admin/report'
     | '/admin/roster'
     | '/admin/scores'
     | '/api/match_results'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/school-bracket'
     | '/standings'
+    | '/admin/report'
     | '/admin/roster'
     | '/admin/scores'
     | '/api/match_results'
@@ -196,6 +208,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRosterRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/report': {
+      id: '/admin/report'
+      path: '/report'
+      fullPath: '/admin/report'
+      preLoaderRoute: typeof AdminReportRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/api/survey/student': {
       id: '/api/survey/student'
       path: '/api/survey/student'
@@ -214,11 +233,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminReportRoute: typeof AdminReportRoute
   AdminRosterRoute: typeof AdminRosterRoute
   AdminScoresRoute: typeof AdminScoresRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminReportRoute: AdminReportRoute,
   AdminRosterRoute: AdminRosterRoute,
   AdminScoresRoute: AdminScoresRoute,
 }
@@ -237,3 +258,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
