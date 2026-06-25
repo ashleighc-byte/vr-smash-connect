@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      match_results: {
+        Row: {
+          created_at: string | null
+          game1_a: number | null
+          game1_b: number | null
+          game2_a: number | null
+          game2_b: number | null
+          game3_a: number | null
+          game3_b: number | null
+          games_won_a: number | null
+          games_won_b: number | null
+          id: string
+          match_day: string | null
+          player_a: string | null
+          player_b: string | null
+          points_a: number | null
+          points_b: number | null
+          school_a: string | null
+          school_b: string | null
+          walkover: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          game1_a?: number | null
+          game1_b?: number | null
+          game2_a?: number | null
+          game2_b?: number | null
+          game3_a?: number | null
+          game3_b?: number | null
+          games_won_a?: number | null
+          games_won_b?: number | null
+          id?: string
+          match_day?: string | null
+          player_a?: string | null
+          player_b?: string | null
+          points_a?: number | null
+          points_b?: number | null
+          school_a?: string | null
+          school_b?: string | null
+          walkover?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          game1_a?: number | null
+          game1_b?: number | null
+          game2_a?: number | null
+          game2_b?: number | null
+          game3_a?: number | null
+          game3_b?: number | null
+          games_won_a?: number | null
+          games_won_b?: number | null
+          id?: string
+          match_day?: string | null
+          player_a?: string | null
+          player_b?: string | null
+          points_a?: number | null
+          points_b?: number | null
+          school_a?: string | null
+          school_b?: string | null
+          walkover?: boolean | null
+        }
+        Relationships: []
+      }
       staff_survey_responses: {
         Row: {
           casting_worked: string | null
@@ -211,88 +274,25 @@ export type Database = {
       }
       tournament_rosters: {
         Row: {
-          id: string
-          school: string
-          player_slot: string
-          student_name: string
           created_at: string | null
+          id: string
+          player_slot: string
+          school: string
+          student_name: string | null
         }
         Insert: {
-          id?: string
-          school: string
-          player_slot: string
-          student_name: string
           created_at?: string | null
+          id?: string
+          player_slot: string
+          school: string
+          student_name?: string | null
         }
         Update: {
+          created_at?: string | null
           id?: string
-          school?: string
           player_slot?: string
-          student_name?: string
-          created_at?: string | null
-        }
-        Relationships: []
-      }
-      match_results: {
-        Row: {
-          id: string
-          match_day: string
-          school_a: string
-          school_b: string
-          player_a: string
-          player_b: string
-          game1_a: number
-          game1_b: number
-          game2_a: number
-          game2_b: number
-          game3_a: number | null
-          game3_b: number | null
-          games_won_a: number
-          games_won_b: number
-          points_a: number
-          points_b: number
-          walkover: boolean
-          created_at: string | null
-        }
-        Insert: {
-          id?: string
-          match_day: string
-          school_a: string
-          school_b: string
-          player_a: string
-          player_b: string
-          game1_a?: number
-          game1_b?: number
-          game2_a?: number
-          game2_b?: number
-          game3_a?: number | null
-          game3_b?: number | null
-          games_won_a?: number
-          games_won_b?: number
-          points_a?: number
-          points_b?: number
-          walkover?: boolean
-          created_at?: string | null
-        }
-        Update: {
-          id?: string
-          match_day?: string
-          school_a?: string
-          school_b?: string
-          player_a?: string
-          player_b?: string
-          game1_a?: number
-          game1_b?: number
-          game2_a?: number
-          game2_b?: number
-          game3_a?: number | null
-          game3_b?: number | null
-          games_won_a?: number
-          games_won_b?: number
-          points_a?: number
-          points_b?: number
-          walkover?: boolean
-          created_at?: string | null
+          school?: string
+          student_name?: string | null
         }
         Relationships: []
       }
