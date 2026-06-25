@@ -108,6 +108,7 @@ function AdminPage() {
           <a href="/admin/roster" style={{ background: BLACK, color: "#f5f5f5", padding: "0.75rem 1.25rem", borderRadius: 4, fontSize: 14, fontWeight: 700, textDecoration: "none", letterSpacing: "0.02em" }}>Roster</a>
           <a href="/admin/scores" style={{ background: RED, color: "#f5f5f5", padding: "0.75rem 1.25rem", borderRadius: 4, fontSize: 14, fontWeight: 700, textDecoration: "none", letterSpacing: "0.02em" }}>Scores</a>
           <a href="/admin/report" style={{ background: "#1e5fa8", color: "#f5f5f5", padding: "0.75rem 1.25rem", borderRadius: 4, fontSize: 14, fontWeight: 700, textDecoration: "none", letterSpacing: "0.02em" }}>Survey Report</a>
+          <a href="/admin/signups" style={{ background: "#b45309", color: "#f5f5f5", padding: "0.75rem 1.25rem", borderRadius: 4, fontSize: 14, fontWeight: 700, textDecoration: "none", letterSpacing: "0.02em" }}>Sign-ups</a>
         </section>
 
         <Panel title="Student survey — by school" onDownload={() => download("student_survey.csv", toCsv(students))}>

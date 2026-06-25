@@ -10,19 +10,34 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StandingsRouteImport } from './routes/standings'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SchoolBracketRouteImport } from './routes/school-bracket'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BracketSchoolRouteImport } from './routes/bracket.$school'
 import { Route as ApiMatch_resultsRouteImport } from './routes/api/match_results'
+import { Route as AdminSignupsRouteImport } from './routes/admin.signups'
 import { Route as AdminScoresRouteImport } from './routes/admin.scores'
 import { Route as AdminRosterRouteImport } from './routes/admin.roster'
 import { Route as AdminReportRouteImport } from './routes/admin.report'
 import { Route as ApiSurveyStudentRouteImport } from './routes/api/survey.student'
 import { Route as ApiSurveyStaffRouteImport } from './routes/api/survey.staff'
+import { Route as ApiPlayoffUpdateStatusRouteImport } from './routes/api/playoff.update-status'
+import { Route as ApiPlayoffSignupsRouteImport } from './routes/api/playoff.signups'
+import { Route as ApiPlayoffSignupRouteImport } from './routes/api/playoff.signup'
+import { Route as ApiPlayoffSchoolSettingsRouteImport } from './routes/api/playoff.school-settings'
+import { Route as ApiPlayoffPublishBracketRouteImport } from './routes/api/playoff.publish-bracket'
+import { Route as ApiPlayoffPublicBracketRouteImport } from './routes/api/playoff.public-bracket'
+import { Route as ApiPlayoffCountRouteImport } from './routes/api/playoff.count'
 
 const StandingsRoute = StandingsRouteImport.update({
   id: '/standings',
   path: '/standings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SchoolBracketRoute = SchoolBracketRouteImport.update({
@@ -40,10 +55,20 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BracketSchoolRoute = BracketSchoolRouteImport.update({
+  id: '/bracket/$school',
+  path: '/bracket/$school',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiMatch_resultsRoute = ApiMatch_resultsRouteImport.update({
   id: '/api/match_results',
   path: '/api/match_results',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSignupsRoute = AdminSignupsRouteImport.update({
+  id: '/signups',
+  path: '/signups',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminScoresRoute = AdminScoresRouteImport.update({
   id: '/scores',
@@ -70,16 +95,63 @@ const ApiSurveyStaffRoute = ApiSurveyStaffRouteImport.update({
   path: '/api/survey/staff',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPlayoffUpdateStatusRoute = ApiPlayoffUpdateStatusRouteImport.update({
+  id: '/api/playoff/update-status',
+  path: '/api/playoff/update-status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPlayoffSignupsRoute = ApiPlayoffSignupsRouteImport.update({
+  id: '/api/playoff/signups',
+  path: '/api/playoff/signups',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPlayoffSignupRoute = ApiPlayoffSignupRouteImport.update({
+  id: '/api/playoff/signup',
+  path: '/api/playoff/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPlayoffSchoolSettingsRoute =
+  ApiPlayoffSchoolSettingsRouteImport.update({
+    id: '/api/playoff/school-settings',
+    path: '/api/playoff/school-settings',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPlayoffPublishBracketRoute =
+  ApiPlayoffPublishBracketRouteImport.update({
+    id: '/api/playoff/publish-bracket',
+    path: '/api/playoff/publish-bracket',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPlayoffPublicBracketRoute = ApiPlayoffPublicBracketRouteImport.update({
+  id: '/api/playoff/public-bracket',
+  path: '/api/playoff/public-bracket',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPlayoffCountRoute = ApiPlayoffCountRouteImport.update({
+  id: '/api/playoff/count',
+  path: '/api/playoff/count',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/school-bracket': typeof SchoolBracketRoute
+  '/signup': typeof SignupRoute
   '/standings': typeof StandingsRoute
   '/admin/report': typeof AdminReportRoute
   '/admin/roster': typeof AdminRosterRoute
   '/admin/scores': typeof AdminScoresRoute
+  '/admin/signups': typeof AdminSignupsRoute
   '/api/match_results': typeof ApiMatch_resultsRoute
+  '/bracket/$school': typeof BracketSchoolRoute
+  '/api/playoff/count': typeof ApiPlayoffCountRoute
+  '/api/playoff/public-bracket': typeof ApiPlayoffPublicBracketRoute
+  '/api/playoff/publish-bracket': typeof ApiPlayoffPublishBracketRoute
+  '/api/playoff/school-settings': typeof ApiPlayoffSchoolSettingsRoute
+  '/api/playoff/signup': typeof ApiPlayoffSignupRoute
+  '/api/playoff/signups': typeof ApiPlayoffSignupsRoute
+  '/api/playoff/update-status': typeof ApiPlayoffUpdateStatusRoute
   '/api/survey/staff': typeof ApiSurveyStaffRoute
   '/api/survey/student': typeof ApiSurveyStudentRoute
 }
@@ -87,11 +159,21 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/school-bracket': typeof SchoolBracketRoute
+  '/signup': typeof SignupRoute
   '/standings': typeof StandingsRoute
   '/admin/report': typeof AdminReportRoute
   '/admin/roster': typeof AdminRosterRoute
   '/admin/scores': typeof AdminScoresRoute
+  '/admin/signups': typeof AdminSignupsRoute
   '/api/match_results': typeof ApiMatch_resultsRoute
+  '/bracket/$school': typeof BracketSchoolRoute
+  '/api/playoff/count': typeof ApiPlayoffCountRoute
+  '/api/playoff/public-bracket': typeof ApiPlayoffPublicBracketRoute
+  '/api/playoff/publish-bracket': typeof ApiPlayoffPublishBracketRoute
+  '/api/playoff/school-settings': typeof ApiPlayoffSchoolSettingsRoute
+  '/api/playoff/signup': typeof ApiPlayoffSignupRoute
+  '/api/playoff/signups': typeof ApiPlayoffSignupsRoute
+  '/api/playoff/update-status': typeof ApiPlayoffUpdateStatusRoute
   '/api/survey/staff': typeof ApiSurveyStaffRoute
   '/api/survey/student': typeof ApiSurveyStudentRoute
 }
@@ -100,11 +182,21 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/school-bracket': typeof SchoolBracketRoute
+  '/signup': typeof SignupRoute
   '/standings': typeof StandingsRoute
   '/admin/report': typeof AdminReportRoute
   '/admin/roster': typeof AdminRosterRoute
   '/admin/scores': typeof AdminScoresRoute
+  '/admin/signups': typeof AdminSignupsRoute
   '/api/match_results': typeof ApiMatch_resultsRoute
+  '/bracket/$school': typeof BracketSchoolRoute
+  '/api/playoff/count': typeof ApiPlayoffCountRoute
+  '/api/playoff/public-bracket': typeof ApiPlayoffPublicBracketRoute
+  '/api/playoff/publish-bracket': typeof ApiPlayoffPublishBracketRoute
+  '/api/playoff/school-settings': typeof ApiPlayoffSchoolSettingsRoute
+  '/api/playoff/signup': typeof ApiPlayoffSignupRoute
+  '/api/playoff/signups': typeof ApiPlayoffSignupsRoute
+  '/api/playoff/update-status': typeof ApiPlayoffUpdateStatusRoute
   '/api/survey/staff': typeof ApiSurveyStaffRoute
   '/api/survey/student': typeof ApiSurveyStudentRoute
 }
@@ -114,11 +206,21 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/school-bracket'
+    | '/signup'
     | '/standings'
     | '/admin/report'
     | '/admin/roster'
     | '/admin/scores'
+    | '/admin/signups'
     | '/api/match_results'
+    | '/bracket/$school'
+    | '/api/playoff/count'
+    | '/api/playoff/public-bracket'
+    | '/api/playoff/publish-bracket'
+    | '/api/playoff/school-settings'
+    | '/api/playoff/signup'
+    | '/api/playoff/signups'
+    | '/api/playoff/update-status'
     | '/api/survey/staff'
     | '/api/survey/student'
   fileRoutesByTo: FileRoutesByTo
@@ -126,11 +228,21 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/school-bracket'
+    | '/signup'
     | '/standings'
     | '/admin/report'
     | '/admin/roster'
     | '/admin/scores'
+    | '/admin/signups'
     | '/api/match_results'
+    | '/bracket/$school'
+    | '/api/playoff/count'
+    | '/api/playoff/public-bracket'
+    | '/api/playoff/publish-bracket'
+    | '/api/playoff/school-settings'
+    | '/api/playoff/signup'
+    | '/api/playoff/signups'
+    | '/api/playoff/update-status'
     | '/api/survey/staff'
     | '/api/survey/student'
   id:
@@ -138,11 +250,21 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/school-bracket'
+    | '/signup'
     | '/standings'
     | '/admin/report'
     | '/admin/roster'
     | '/admin/scores'
+    | '/admin/signups'
     | '/api/match_results'
+    | '/bracket/$school'
+    | '/api/playoff/count'
+    | '/api/playoff/public-bracket'
+    | '/api/playoff/publish-bracket'
+    | '/api/playoff/school-settings'
+    | '/api/playoff/signup'
+    | '/api/playoff/signups'
+    | '/api/playoff/update-status'
     | '/api/survey/staff'
     | '/api/survey/student'
   fileRoutesById: FileRoutesById
@@ -151,8 +273,17 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   SchoolBracketRoute: typeof SchoolBracketRoute
+  SignupRoute: typeof SignupRoute
   StandingsRoute: typeof StandingsRoute
   ApiMatch_resultsRoute: typeof ApiMatch_resultsRoute
+  BracketSchoolRoute: typeof BracketSchoolRoute
+  ApiPlayoffCountRoute: typeof ApiPlayoffCountRoute
+  ApiPlayoffPublicBracketRoute: typeof ApiPlayoffPublicBracketRoute
+  ApiPlayoffPublishBracketRoute: typeof ApiPlayoffPublishBracketRoute
+  ApiPlayoffSchoolSettingsRoute: typeof ApiPlayoffSchoolSettingsRoute
+  ApiPlayoffSignupRoute: typeof ApiPlayoffSignupRoute
+  ApiPlayoffSignupsRoute: typeof ApiPlayoffSignupsRoute
+  ApiPlayoffUpdateStatusRoute: typeof ApiPlayoffUpdateStatusRoute
   ApiSurveyStaffRoute: typeof ApiSurveyStaffRoute
   ApiSurveyStudentRoute: typeof ApiSurveyStudentRoute
 }
@@ -164,6 +295,13 @@ declare module '@tanstack/react-router' {
       path: '/standings'
       fullPath: '/standings'
       preLoaderRoute: typeof StandingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/school-bracket': {
@@ -187,12 +325,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/bracket/$school': {
+      id: '/bracket/$school'
+      path: '/bracket/$school'
+      fullPath: '/bracket/$school'
+      preLoaderRoute: typeof BracketSchoolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/match_results': {
       id: '/api/match_results'
       path: '/api/match_results'
       fullPath: '/api/match_results'
       preLoaderRoute: typeof ApiMatch_resultsRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/signups': {
+      id: '/admin/signups'
+      path: '/signups'
+      fullPath: '/admin/signups'
+      preLoaderRoute: typeof AdminSignupsRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/scores': {
       id: '/admin/scores'
@@ -229,6 +381,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSurveyStaffRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/playoff/update-status': {
+      id: '/api/playoff/update-status'
+      path: '/api/playoff/update-status'
+      fullPath: '/api/playoff/update-status'
+      preLoaderRoute: typeof ApiPlayoffUpdateStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/playoff/signups': {
+      id: '/api/playoff/signups'
+      path: '/api/playoff/signups'
+      fullPath: '/api/playoff/signups'
+      preLoaderRoute: typeof ApiPlayoffSignupsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/playoff/signup': {
+      id: '/api/playoff/signup'
+      path: '/api/playoff/signup'
+      fullPath: '/api/playoff/signup'
+      preLoaderRoute: typeof ApiPlayoffSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/playoff/school-settings': {
+      id: '/api/playoff/school-settings'
+      path: '/api/playoff/school-settings'
+      fullPath: '/api/playoff/school-settings'
+      preLoaderRoute: typeof ApiPlayoffSchoolSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/playoff/publish-bracket': {
+      id: '/api/playoff/publish-bracket'
+      path: '/api/playoff/publish-bracket'
+      fullPath: '/api/playoff/publish-bracket'
+      preLoaderRoute: typeof ApiPlayoffPublishBracketRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/playoff/public-bracket': {
+      id: '/api/playoff/public-bracket'
+      path: '/api/playoff/public-bracket'
+      fullPath: '/api/playoff/public-bracket'
+      preLoaderRoute: typeof ApiPlayoffPublicBracketRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/playoff/count': {
+      id: '/api/playoff/count'
+      path: '/api/playoff/count'
+      fullPath: '/api/playoff/count'
+      preLoaderRoute: typeof ApiPlayoffCountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -236,12 +437,14 @@ interface AdminRouteChildren {
   AdminReportRoute: typeof AdminReportRoute
   AdminRosterRoute: typeof AdminRosterRoute
   AdminScoresRoute: typeof AdminScoresRoute
+  AdminSignupsRoute: typeof AdminSignupsRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminReportRoute: AdminReportRoute,
   AdminRosterRoute: AdminRosterRoute,
   AdminScoresRoute: AdminScoresRoute,
+  AdminSignupsRoute: AdminSignupsRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
@@ -250,8 +453,17 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   SchoolBracketRoute: SchoolBracketRoute,
+  SignupRoute: SignupRoute,
   StandingsRoute: StandingsRoute,
   ApiMatch_resultsRoute: ApiMatch_resultsRoute,
+  BracketSchoolRoute: BracketSchoolRoute,
+  ApiPlayoffCountRoute: ApiPlayoffCountRoute,
+  ApiPlayoffPublicBracketRoute: ApiPlayoffPublicBracketRoute,
+  ApiPlayoffPublishBracketRoute: ApiPlayoffPublishBracketRoute,
+  ApiPlayoffSchoolSettingsRoute: ApiPlayoffSchoolSettingsRoute,
+  ApiPlayoffSignupRoute: ApiPlayoffSignupRoute,
+  ApiPlayoffSignupsRoute: ApiPlayoffSignupsRoute,
+  ApiPlayoffUpdateStatusRoute: ApiPlayoffUpdateStatusRoute,
   ApiSurveyStaffRoute: ApiSurveyStaffRoute,
   ApiSurveyStudentRoute: ApiSurveyStudentRoute,
 }
