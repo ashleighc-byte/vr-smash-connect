@@ -27,7 +27,7 @@ const BORDER = "#ddd";
 async function fetchResults(): Promise<MatchResult[]> {
   const { data, error } = await supabase.from("match_results").select("*").order("created_at", { ascending: true });
   if (error) throw error;
-  return (data as JSON as MatchResult[]) ?? [];
+  return ((data ?? []) as unknown as MatchResult[]);
 }
 
 interface SchoolStats {

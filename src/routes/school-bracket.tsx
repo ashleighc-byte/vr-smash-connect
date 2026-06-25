@@ -240,10 +240,10 @@ function SchoolBracketPage() {
 
       if (mx.savedId) {
         payload.id = mx.savedId;
-        const { error } = await supabase.from("match_results").update(payload).eq("id", mx.savedId);
+        const { error } = await supabase.from("match_results").update(payload as never).eq("id", mx.savedId);
         if (error) throw error;
       } else {
-        const { data, error } = await supabase.from("match_results").insert(payload).select("id").single();
+        const { data, error } = await supabase.from("match_results").insert(payload as never).select("id").single();
         if (error) throw error;
         setSavedMatchIds(prev => new Set(prev).add(matchId));
         // Store the saved ID

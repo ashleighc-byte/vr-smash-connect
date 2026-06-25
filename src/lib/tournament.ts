@@ -17,8 +17,8 @@ export type MatchDay =
 export interface ScheduledMatch {
   day: MatchDay;
   label: string;
-  schoolA: School;
-  schoolB: School;
+  schoolA: School | "TBC";
+  schoolB: School | "TBC";
   isKnockout: boolean;
 }
 
