@@ -209,7 +209,7 @@ function ReportPage() {
 // STUDENT TAB
 // ═══════════════════════════════════════════════════════════════
 
-function StudentTab({ rows, chartsReady, chartJsRef }: { rows: Row[]; chartsReady: boolean; chartJsRef: React.MutableRefObject<typeof import("chart.js") | null> }) {
+function StudentTab({ rows, chartsReady, chartJsRef }: { rows: Row[]; chartsReady: boolean; chartJsRef: React.MutableRefObject<any | null> }) {
   const n = rows.length;
   const schools = ["Piopio College", "Taumarunui High School", "Otorohanga College", "Te Kuiti High School"];
 
@@ -337,7 +337,7 @@ function StudentTab({ rows, chartsReady, chartJsRef }: { rows: Row[]; chartsRead
 // STAFF TAB
 // ═══════════════════════════════════════════════════════════════
 
-function StaffTab({ rows, chartsReady, chartJsRef }: { rows: Row[]; chartsReady: boolean; chartJsRef: React.MutableRefObject<typeof import("chart.js") | null> }) {
+function StaffTab({ rows, chartsReady, chartJsRef }: { rows: Row[]; chartsReady: boolean; chartJsRef: React.MutableRefObject<any | null> }) {
   const n = rows.length;
 
   const avgSetup = useMemo(() => average(rows, "setup_ease"), [rows]);
@@ -441,7 +441,7 @@ function StaffTab({ rows, chartsReady, chartJsRef }: { rows: Row[]; chartsReady:
 // COMBINED TAB
 // ═══════════════════════════════════════════════════════════════
 
-function CombinedTab({ students, staff }: { students: Row[]; staff: Row[]; chartsReady: boolean; chartJsRef: React.MutableRefObject<typeof import("chart.js") | null> }) {
+function CombinedTab({ students, staff }: { students: Row[]; staff: Row[]; chartsReady: boolean; chartJsRef: React.MutableRefObject<any | null> }) {
   const s = students, t = staff;
   const sn = s.length, tn = t.length;
 
@@ -579,7 +579,7 @@ function CombinedTab({ students, staff }: { students: Row[]; staff: Row[]; chart
 // CHART COMPONENTS
 // ═══════════════════════════════════════════════════════════════
 
-function BarChart({ canvasId, data, chartJsRef }: { canvasId: string; data: Record<string, number>; chartJsRef: React.MutableRefObject<typeof import("chart.js") | null> }) {
+function BarChart({ canvasId, data, chartJsRef }: { canvasId: string; data: Record<string, number>; chartJsRef: React.MutableRefObject<any | null> }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<import("chart.js").Chart | null>(null);
 
@@ -617,7 +617,7 @@ function BarChart({ canvasId, data, chartJsRef }: { canvasId: string; data: Reco
   return <canvas ref={canvasRef} id={canvasId} style={{ width: "100%", height: 220 }} />;
 }
 
-function HBarChart({ canvasId, data, chartJsRef }: { canvasId: string; data: Record<string, number>; chartJsRef: React.MutableRefObject<typeof import("chart.js") | null> }) {
+function HBarChart({ canvasId, data, chartJsRef }: { canvasId: string; data: Record<string, number>; chartJsRef: React.MutableRefObject<any | null> }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<import("chart.js").Chart | null>(null);
 
@@ -655,7 +655,7 @@ function HBarChart({ canvasId, data, chartJsRef }: { canvasId: string; data: Rec
   return <canvas ref={canvasRef} id={canvasId} style={{ width: "100%", height: Math.max(180, Object.keys(data).length * 36) }} />;
 }
 
-function DonutChart({ canvasId, data, chartJsRef }: { canvasId: string; data: Record<string, number>; chartJsRef: React.MutableRefObject<typeof import("chart.js") | null> }) {
+function DonutChart({ canvasId, data, chartJsRef }: { canvasId: string; data: Record<string, number>; chartJsRef: React.MutableRefObject<any | null> }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<import("chart.js").Chart | null>(null);
 
