@@ -1,18 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
+// @client-only — this component must never run on the server
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SCHOOLS, type School, type TournamentRoster } from "@/lib/tournament";
 
-export const Route = createFileRoute("/school-bracket")({
-  head: () => ({
-    meta: [
-      { title: "School Playoff Bracket — VR Table Tennis" },
-      { name: "description", content: "Generate and manage your school's internal playoff bracket for VR Table Tennis." },
-    ],
-  }),
-  component: SchoolBracketPage,
-});
+export default function SchoolBracket() {
+  return <SchoolBracketPage />;
+}
 
 // ── Tokens ──
 const BLACK = "#1a1a1a";
