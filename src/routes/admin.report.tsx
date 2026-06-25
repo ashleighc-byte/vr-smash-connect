@@ -108,14 +108,23 @@ function ReportPage() {
   // Load Chart.js from CDN once
   useEffect(() => {
     if (chartJsRef.current) return;
-    import("https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" as unknown as string)
-      .then(mod => {
-        mod.Chart.defaults.color = MID;
-        mod.Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-        chartJsRef.current = mod;
-        setChartsReady(true);
-      })
-      .catch(() => {});
+    const w = window as any;
+    const init = (Chart: any) => {
+      Chart.defaults.color = MID;
+      Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      chartJsRef.current = { Chart };
+      setChartsReady(true);
+    };
+    if (w.Chart) { init(w.Chart); return; }
+    const existing = document.querySelector<HTMLScriptElement>('script[data-chartjs]');
+    const onLoad = () => w.Chart && init(w.Chart);
+    if (existing) { existing.addEventListener("load", onLoad); return; }
+    const s = document.createElement("script");
+    s.src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js";
+    s.async = true;
+    s.dataset.chartjs = "1";
+    s.onload = onLoad;
+    document.head.appendChild(s);
   }, []);
 
   // Inject print styles client-side
