@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { fetchReportData } from "@/lib/report.functions";
 
 export const Route = createFileRoute("/admin/report")({
   head: () => ({ meta: [{ title: "Survey Report — VR Table Tennis Pilot" }, { name: "robots", content: "noindex" }] }),
@@ -93,18 +94,15 @@ function topN(obj: Record<string, number>, n: number): [string, number][] {
 // ═══════════════════════════════════════════════════════════════
 
 function ReportPage() {
-  const fetchData = useServerFn(async (data: { password: string }) => {
-    const mod = await import("@/lib/report.functions");
-    return mod.fetchReportData({ data });
-  });
+  const fetchData = useServerFn(fetchReportData);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<{ students: Row[]; staff: Row[] } | null>(null);
   const [tab, setTab] = useState<Tab>("student");
 
-  // Chart.js reference
-  const chartJsRef = useRef<typeof import("chart.js") | null>(null);
+  // Chart.js reference (loaded from CDN, untyped)
+  const chartJsRef = useRef<any>(null);
   const [chartsReady, setChartsReady] = useState(false);
 
   // Load Chart.js from CDN once
@@ -211,7 +209,7 @@ function ReportPage() {
 // STUDENT TAB
 // ═══════════════════════════════════════════════════════════════
 
-function StudentTab({ rows, chartsReady, chartJsRef }: { rows: Row[]; chartsReady: boolean; chartJsRef: React.MutableRefObject<typeof import("chart.js") | null> }) {
+function StudentTab({ rows, chartsReady, chartJsRef }: { rows: Row[]; chartsReady: boolean; chartJsRef: React.MutableRefObject<any | null> }) {
   const n = rows.length;
   const schools = ["Piopio College", "Taumarunui High School", "Otorohanga College", "Te Kuiti High School"];
 
@@ -339,7 +337,7 @@ function StudentTab({ rows, chartsReady, chartJsRef }: { rows: Row[]; chartsRead
 // STAFF TAB
 // ═══════════════════════════════════════════════════════════════
 
-function StaffTab({ rows, chartsReady, chartJsRef }: { rows: Row[]; chartsReady: boolean; chartJsRef: React.MutableRefObject<typeof import("chart.js") | null> }) {
+function StaffTab({ rows, chartsReady, chartJsRef }: { rows: Row[]; chartsReady: boolean; chartJsRef: React.MutableRefObject<any | null> }) {
   const n = rows.length;
 
   const avgSetup = useMemo(() => average(rows, "setup_ease"), [rows]);
@@ -443,7 +441,7 @@ function StaffTab({ rows, chartsReady, chartJsRef }: { rows: Row[]; chartsReady:
 // COMBINED TAB
 // ═══════════════════════════════════════════════════════════════
 
-function CombinedTab({ students, staff }: { students: Row[]; staff: Row[]; chartsReady: boolean; chartJsRef: React.MutableRefObject<typeof import("chart.js") | null> }) {
+function CombinedTab({ students, staff }: { students: Row[]; staff: Row[]; chartsReady: boolean; chartJsRef: React.MutableRefObject<any | null> }) {
   const s = students, t = staff;
   const sn = s.length, tn = t.length;
 
@@ -581,9 +579,9 @@ function CombinedTab({ students, staff }: { students: Row[]; staff: Row[]; chart
 // CHART COMPONENTS
 // ═══════════════════════════════════════════════════════════════
 
-function BarChart({ canvasId, data, chartJsRef }: { canvasId: string; data: Record<string, number>; chartJsRef: React.MutableRefObject<typeof import("chart.js") | null> }) {
+function BarChart({ canvasId, data, chartJsRef }: { canvasId: string; data: Record<string, number>; chartJsRef: React.MutableRefObject<any | null> }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const chartRef = useRef<import("chart.js").Chart | null>(null);
+  const chartRef = useRef<any | null>(null);
 
   useEffect(() => {
     if (!chartJsRef.current || !canvasRef.current) return;
@@ -619,9 +617,9 @@ function BarChart({ canvasId, data, chartJsRef }: { canvasId: string; data: Reco
   return <canvas ref={canvasRef} id={canvasId} style={{ width: "100%", height: 220 }} />;
 }
 
-function HBarChart({ canvasId, data, chartJsRef }: { canvasId: string; data: Record<string, number>; chartJsRef: React.MutableRefObject<typeof import("chart.js") | null> }) {
+function HBarChart({ canvasId, data, chartJsRef }: { canvasId: string; data: Record<string, number>; chartJsRef: React.MutableRefObject<any | null> }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const chartRef = useRef<import("chart.js").Chart | null>(null);
+  const chartRef = useRef<any | null>(null);
 
   useEffect(() => {
     if (!chartJsRef.current || !canvasRef.current) return;
@@ -657,9 +655,9 @@ function HBarChart({ canvasId, data, chartJsRef }: { canvasId: string; data: Rec
   return <canvas ref={canvasRef} id={canvasId} style={{ width: "100%", height: Math.max(180, Object.keys(data).length * 36) }} />;
 }
 
-function DonutChart({ canvasId, data, chartJsRef }: { canvasId: string; data: Record<string, number>; chartJsRef: React.MutableRefObject<typeof import("chart.js") | null> }) {
+function DonutChart({ canvasId, data, chartJsRef }: { canvasId: string; data: Record<string, number>; chartJsRef: React.MutableRefObject<any | null> }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const chartRef = useRef<import("chart.js").Chart | null>(null);
+  const chartRef = useRef<any | null>(null);
 
   useEffect(() => {
     if (!chartJsRef.current || !canvasRef.current) return;
