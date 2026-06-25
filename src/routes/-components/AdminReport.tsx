@@ -1,12 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+// @client-only — this component must never run on the server
 import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fetchReportData } from "@/lib/report.functions";
 
-export const Route = createFileRoute("/admin/report")({
-  head: () => ({ meta: [{ title: "Survey Report — VR Table Tennis Pilot" }, { name: "robots", content: "noindex" }] }),
-  component: ReportPage,
-});
+export default function AdminReport() {
+  return <ReportPage />;
+}
 
 // ── Design tokens ──
 const BLACK = "#1a1a1a";
