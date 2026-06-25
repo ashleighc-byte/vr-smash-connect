@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as StandingsRouteImport } from './routes/standings'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SchoolBracketRouteImport } from './routes/school-bracket'
+import { Route as ForTeachersRouteImport } from './routes/for-teachers'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BracketSchoolRouteImport } from './routes/bracket.$school'
@@ -43,6 +44,11 @@ const SignupRoute = SignupRouteImport.update({
 const SchoolBracketRoute = SchoolBracketRouteImport.update({
   id: '/school-bracket',
   path: '/school-bracket',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForTeachersRoute = ForTeachersRouteImport.update({
+  id: '/for-teachers',
+  path: '/for-teachers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -136,6 +142,7 @@ const ApiPlayoffCountRoute = ApiPlayoffCountRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/for-teachers': typeof ForTeachersRoute
   '/school-bracket': typeof SchoolBracketRoute
   '/signup': typeof SignupRoute
   '/standings': typeof StandingsRoute
@@ -158,6 +165,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/for-teachers': typeof ForTeachersRoute
   '/school-bracket': typeof SchoolBracketRoute
   '/signup': typeof SignupRoute
   '/standings': typeof StandingsRoute
@@ -181,6 +189,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/for-teachers': typeof ForTeachersRoute
   '/school-bracket': typeof SchoolBracketRoute
   '/signup': typeof SignupRoute
   '/standings': typeof StandingsRoute
@@ -205,6 +214,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/for-teachers'
     | '/school-bracket'
     | '/signup'
     | '/standings'
@@ -227,6 +237,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/for-teachers'
     | '/school-bracket'
     | '/signup'
     | '/standings'
@@ -249,6 +260,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/for-teachers'
     | '/school-bracket'
     | '/signup'
     | '/standings'
@@ -272,6 +284,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  ForTeachersRoute: typeof ForTeachersRoute
   SchoolBracketRoute: typeof SchoolBracketRoute
   SignupRoute: typeof SignupRoute
   StandingsRoute: typeof StandingsRoute
@@ -309,6 +322,13 @@ declare module '@tanstack/react-router' {
       path: '/school-bracket'
       fullPath: '/school-bracket'
       preLoaderRoute: typeof SchoolBracketRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/for-teachers': {
+      id: '/for-teachers'
+      path: '/for-teachers'
+      fullPath: '/for-teachers'
+      preLoaderRoute: typeof ForTeachersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -452,6 +472,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  ForTeachersRoute: ForTeachersRoute,
   SchoolBracketRoute: SchoolBracketRoute,
   SignupRoute: SignupRoute,
   StandingsRoute: StandingsRoute,
@@ -470,3 +491,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

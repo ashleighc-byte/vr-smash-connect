@@ -76,6 +76,8 @@
     list-style: none;
     overflow-x: auto;
   }
+  .nav-link-pill { border: 1.5px solid var(--red); border-radius: 20px; padding: 0.2rem 0.85rem !important; color: var(--red) !important; font-weight: 700 !important; font-size: 0.78rem !important; margin: 0.15rem 0; background: transparent !important; }
+  .nav-link-pill:hover { background: var(--red) !important; color: var(--white) !important; }
   .nav-links a {
     display: block;
     padding: 0 0.85rem;
@@ -645,6 +647,7 @@
       <li><a href="#" onclick="showPage('privacy')" data-page="privacy">Privacy</a></li>
       <li><a href="#" onclick="showPage('timeline')" data-page="timeline">Timeline</a></li>
       <li><a href="#" onclick="showPage('standings')" data-page="standings">Standings</a></li>
+      <li><a href="/for-teachers" class="nav-link-pill">For teachers</a></li>
     </ul>
   </div>
 </nav>
@@ -705,6 +708,13 @@
     <!-- Resources -->
     <div class="section-label">Resources &amp; tools</div>
     <div class="resource-grid">
+      <a class="resource-card" href="/for-teachers" style="border-color:var(--red);background:var(--red-lt);">
+        <span class="card-icon">👩‍🏫</span>
+        <div class="card-cat" style="color:var(--red);font-weight:700;">START HERE</div>
+        <div class="card-title" style="font-size:0.95rem;">For teachers — what we need from you</div>
+        <div class="card-desc" style="font-size:0.82rem;">Your 4 jobs for the VR tournament (everything else is on us).</div>
+        <span class="card-badge" style="background:var(--red);color:#fff;">New</span>
+      </a>
       <a class="resource-card" href="#" onclick="showPage('invite')">
         <span class="card-icon">✉️</span>
         <div class="card-cat">School admin</div>

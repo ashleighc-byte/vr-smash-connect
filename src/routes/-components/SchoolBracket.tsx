@@ -1,12 +1,16 @@
 // @client-only — this component must never run on the server
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSearch } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { SCHOOLS, type School, type TournamentRoster } from "@/lib/tournament";
 
 export default function SchoolBracket() {
   return <SchoolBracketPage />;
 }
+
+// Re-export Route type for search params
+import { Route } from "../school-bracket";
 
 // ── Tokens ──
 const BLACK = "#1a1a1a";
@@ -112,10 +116,12 @@ async function deleteRosterRows(school: School, slots: string[]) {
 function SchoolBracketPage() {
   const queryClient = useQueryClient();
 
+  const { school: searchSchool, players: searchPlayers } = useSearch({ from: Route.id });
+
   const { data: rosters } = useQuery({ queryKey: ["tournament_rosters"], queryFn: fetchRosters });
 
   // ── State ──
-  const [school, setSchool] = useState<School>("Piopio College");
+  const [school, setSchool] = useState<School>((searchSchool as School) || "Piopio College");
   const [players, setPlayers] = useState<Player[]>([]);
   const [startDate, setStartDate] = useState("");
   const [sessionDays, setSessionDays] = useState<number[]>([3]); // Wednesday default
@@ -142,8 +148,18 @@ function SchoolBracketPage() {
         name: r.student_name,
         slot: r.player_slot,
       }));
-    setPlayers(loaded);
+    if (loaded.length > 0) setPlayers(loaded);
   }, [rosters, school]);
+
+  // Pre-populate players from search params (from sign-up manager)
+  useEffect(() => {
+    if (searchPlayers) {
+      const names = searchPlayers.split(",").filter(Boolean);
+      if (names.length > 0) {
+        setPlayers(names.map((name, i) => ({ id: Date.now() + i + Math.random(), name })));
+      }
+    }
+  }, [searchPlayers]);
 
   // ── Player management ──
   const addPlayer = useCallback((name = "") => {
@@ -164,6 +180,75 @@ function SchoolBracketPage() {
     setMatches({});
     setSavedMatchIds(new Set());
   }, []);
+
+  // ── Publish bracket via server function ──
+  const [publishing, setPublishing] = useState(false);
+  const [publishMsg, setPublishMsg] = useState<string | null>(null);
+
+  const publishBracket = useCallback(async () => {
+    if (!confirm(`Publish this bracket for ${school}? It will be visible at /bracket/${school.toLowerCase().replace(/\s+/g, "-")}.`)) return;
+    setPublishing(true);
+    setPublishMsg(null);
+    try {
+      const bracketState = {
+        school,
+        players: players.map(p => p.name.trim()).filter(Boolean),
+        matches: Object.fromEntries(
+          Object.entries(matches).filter(([, m]) => m.p1 && m.p2)
+        ),
+        sessionDates: sessionDates.map(d => d.toISOString()),
+        sessionDays,
+        lunchStart,
+        startDate,
+        type,
+        total,
+        sessions,
+        champion: (() => {
+          const allIds = Object.keys(matches);
+          if (!allIds.length) return null;
+          const finalId = allIds.find(id => {
+            const m = matches[id];
+            return m && m.p1 && m.p2 && !Object.keys(matches).some(otherId => {
+              if (otherId === id) return false;
+              const o = matches[otherId];
+              return o && (o.p1 === m.p1 || o.p2 === m.p1 || o.p1 === m.p2 || o.p2 === m.p2);
+            });
+          });
+          return finalId ? matches[finalId]?.winner : null;
+        })(),
+      };
+
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { error } = await supabaseAdmin
+        .from("published_brackets")
+        .upsert({
+          school,
+          bracket_data: bracketState,
+          is_live: true,
+          published_at: new Date().toISOString(),
+        }, { onConflict: "school" });
+      if (error) throw error;
+      setPublishMsg("\u2713 Bracket published!");
+    } catch {
+      setPublishMsg("Error publishing bracket");
+    }
+    setPublishing(false);
+  }, [school, players, matches, sessionDates, sessionDays, lunchStart, startDate, type, total, sessions]);
+
+  // ── Regenerate from sign-ups via server function ──
+  const regenerateFromSignups = useCallback(async () => {
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data } = await supabaseAdmin
+        .from("playoff_signups")
+        .select("student_name")
+        .eq("school", school)
+        .eq("status", "confirmed");
+      const names = (data ?? []).map((r: any) => r.student_name).filter(Boolean);
+      if (names.length < 2) { alert(`Need at least 2 confirmed players for ${school} (found ${names.length})`); return; }
+      setPlayers(names.map((name: string, i: number) => ({ id: Date.now() + i + Math.random(), name })));
+    } catch { alert("Network error fetching sign-ups"); }
+  }, [school]);
 
   // ── Save rosters to Supabase ──
   const saveRosterMutation = useMutation({
@@ -665,6 +750,35 @@ function SchoolBracketPage() {
           </div>
 
           {/* Action buttons */}
+          {(n >= 2) && (
+            <>
+              <button onClick={publishBracket}
+                disabled={publishing}
+                style={{
+                  display: "inline-block", padding: "0.5rem 1rem", borderRadius: R, fontSize: "0.82rem",
+                  fontWeight: 700, cursor: "pointer", border: "none", letterSpacing: "0.02em",
+                  background: GREEN, color: "#fff", width: "100%", textAlign: "center", marginBottom: "0.5rem",
+                }}>
+                {publishing ? "Publishing…" : "\uD83D\uDCE2 Publish bracket"}
+              </button>
+              {publishMsg && (
+                <span style={{ color: publishMsg.startsWith("\u2713") ? GREEN : RED, fontSize: 12, fontWeight: 600, display: "block", textAlign: "center", marginBottom: "0.5rem" }}>
+                  {publishMsg}
+                </span>
+              )}
+            </>
+          )}
+          {searchPlayers && (
+            <button onClick={regenerateFromSignups}
+              style={{
+                display: "inline-block", padding: "0.5rem 1rem", borderRadius: R, fontSize: "0.82rem",
+                fontWeight: 700, cursor: "pointer", border: "none", letterSpacing: "0.02em",
+                background: "transparent", color: BLUE, border: `1.5px solid ${BLUE}`,
+                width: "100%", textAlign: "center", marginBottom: "0.5rem",
+              }}>
+              \uD83D\uDD04 Regenerate from sign-ups
+            </button>
+          )}
           <button onClick={() => saveRosterMutation.mutate()}
             disabled={saveRosterMutation.isPending}
             style={{
@@ -676,7 +790,7 @@ function SchoolBracketPage() {
           </button>
           {saveRosterMutation.isSuccess && (
             <span style={{ color: GREEN, fontSize: 13, fontWeight: 600, display: "block", textAlign: "center", marginBottom: "0.5rem" }}>
-              Roster saved ✓
+              Roster saved \u2713
             </span>
           )}
           <button onClick={resetAll}
