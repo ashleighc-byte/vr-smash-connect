@@ -186,8 +186,8 @@ function AdminScoresPage() {
       const payload: Partial<MatchResult> & { id?: string } = {
         id: editingId ?? undefined,
         match_day: match.day,
-        school_a: match.schoolA,
-        school_b: match.schoolB,
+        school_a: match.schoolA as School,
+        school_b: match.schoolB as School,
         player_a: playerA,
         player_b: playerB,
         game1_a: Number(g1a),
