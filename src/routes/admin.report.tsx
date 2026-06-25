@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { fetchReportData } from "@/lib/report.functions";
 
 export const Route = createFileRoute("/admin/report")({
   head: () => ({ meta: [{ title: "Survey Report — VR Table Tennis Pilot" }, { name: "robots", content: "noindex" }] }),
@@ -93,18 +94,15 @@ function topN(obj: Record<string, number>, n: number): [string, number][] {
 // ═══════════════════════════════════════════════════════════════
 
 function ReportPage() {
-  const fetchData = useServerFn(async (data: { password: string }) => {
-    const mod = await import("@/lib/report.functions");
-    return mod.fetchReportData({ data });
-  });
+  const fetchData = useServerFn(fetchReportData);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<{ students: Row[]; staff: Row[] } | null>(null);
   const [tab, setTab] = useState<Tab>("student");
 
-  // Chart.js reference
-  const chartJsRef = useRef<typeof import("chart.js") | null>(null);
+  // Chart.js reference (loaded from CDN, untyped)
+  const chartJsRef = useRef<any>(null);
   const [chartsReady, setChartsReady] = useState(false);
 
   // Load Chart.js from CDN once
