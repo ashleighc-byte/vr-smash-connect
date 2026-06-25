@@ -581,7 +581,7 @@ function CombinedTab({ students, staff }: { students: Row[]; staff: Row[]; chart
 
 function BarChart({ canvasId, data, chartJsRef }: { canvasId: string; data: Record<string, number>; chartJsRef: React.MutableRefObject<any | null> }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const chartRef = useRef<import("chart.js").Chart | null>(null);
+  const chartRef = useRef<any | null>(null);
 
   useEffect(() => {
     if (!chartJsRef.current || !canvasRef.current) return;
@@ -619,7 +619,7 @@ function BarChart({ canvasId, data, chartJsRef }: { canvasId: string; data: Reco
 
 function HBarChart({ canvasId, data, chartJsRef }: { canvasId: string; data: Record<string, number>; chartJsRef: React.MutableRefObject<any | null> }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const chartRef = useRef<import("chart.js").Chart | null>(null);
+  const chartRef = useRef<any | null>(null);
 
   useEffect(() => {
     if (!chartJsRef.current || !canvasRef.current) return;
@@ -657,7 +657,7 @@ function HBarChart({ canvasId, data, chartJsRef }: { canvasId: string; data: Rec
 
 function DonutChart({ canvasId, data, chartJsRef }: { canvasId: string; data: Record<string, number>; chartJsRef: React.MutableRefObject<any | null> }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const chartRef = useRef<import("chart.js").Chart | null>(null);
+  const chartRef = useRef<any | null>(null);
 
   useEffect(() => {
     if (!chartJsRef.current || !canvasRef.current) return;
