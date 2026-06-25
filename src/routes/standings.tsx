@@ -1,3 +1,4 @@
+// @ssr-safe — do not import browser-only APIs here
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
