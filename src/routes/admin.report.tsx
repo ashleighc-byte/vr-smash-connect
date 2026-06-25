@@ -118,6 +118,9 @@ function ReportPage() {
       .catch(() => {});
   }, []);
 
+  // Inject print styles client-side
+  usePrintStyles();
+
   async function unlock(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true); setError(null);
@@ -771,10 +774,11 @@ function truncate(s: string, n: number): string {
   return s.length > n ? s.slice(0, n - 1) + "…" : s;
 }
 
-// ── Print styles ──
-const printStyle = document.createElement("style");
-printStyle.textContent = `
-@media print {
+// ── Print styles (injected client-side via effect to avoid SSR crash) ──
+function usePrintStyles() {
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.textContent = `@media print {
   body { background: #fff !important; }
   .no-print { display: none !important; }
   .report-page header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -785,6 +789,8 @@ printStyle.textContent = `
   .chart-legend { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .metric-grid { grid-template-columns: repeat(4, 1fr) !important; }
   .report-content { padding: 0.5in !important; }
+}`;
+    document.head.appendChild(style);
+    return () => style.remove();
+  }, []);
 }
-`;
-document.head.appendChild(printStyle);
