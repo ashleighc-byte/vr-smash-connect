@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StandingsRouteImport } from './routes/standings'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as SchoolBracketRouteImport } from './routes/school-bracket'
 import { Route as ForTeachersRouteImport } from './routes/for-teachers'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -39,6 +40,11 @@ const StandingsRoute = StandingsRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignUpRoute = SignUpRouteImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SchoolBracketRoute = SchoolBracketRouteImport.update({
@@ -144,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/for-teachers': typeof ForTeachersRoute
   '/school-bracket': typeof SchoolBracketRoute
+  '/sign-up': typeof SignUpRoute
   '/signup': typeof SignupRoute
   '/standings': typeof StandingsRoute
   '/admin/report': typeof AdminReportRoute
@@ -167,6 +174,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRouteWithChildren
   '/for-teachers': typeof ForTeachersRoute
   '/school-bracket': typeof SchoolBracketRoute
+  '/sign-up': typeof SignUpRoute
   '/signup': typeof SignupRoute
   '/standings': typeof StandingsRoute
   '/admin/report': typeof AdminReportRoute
@@ -191,6 +199,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/for-teachers': typeof ForTeachersRoute
   '/school-bracket': typeof SchoolBracketRoute
+  '/sign-up': typeof SignUpRoute
   '/signup': typeof SignupRoute
   '/standings': typeof StandingsRoute
   '/admin/report': typeof AdminReportRoute
@@ -216,6 +225,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/for-teachers'
     | '/school-bracket'
+    | '/sign-up'
     | '/signup'
     | '/standings'
     | '/admin/report'
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/for-teachers'
     | '/school-bracket'
+    | '/sign-up'
     | '/signup'
     | '/standings'
     | '/admin/report'
@@ -262,6 +273,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/for-teachers'
     | '/school-bracket'
+    | '/sign-up'
     | '/signup'
     | '/standings'
     | '/admin/report'
@@ -286,6 +298,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   ForTeachersRoute: typeof ForTeachersRoute
   SchoolBracketRoute: typeof SchoolBracketRoute
+  SignUpRoute: typeof SignUpRoute
   SignupRoute: typeof SignupRoute
   StandingsRoute: typeof StandingsRoute
   ApiMatch_resultsRoute: typeof ApiMatch_resultsRoute
@@ -315,6 +328,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-up': {
+      id: '/sign-up'
+      path: '/sign-up'
+      fullPath: '/sign-up'
+      preLoaderRoute: typeof SignUpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/school-bracket': {
@@ -474,6 +494,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   ForTeachersRoute: ForTeachersRoute,
   SchoolBracketRoute: SchoolBracketRoute,
+  SignUpRoute: SignUpRoute,
   SignupRoute: SignupRoute,
   StandingsRoute: StandingsRoute,
   ApiMatch_resultsRoute: ApiMatch_resultsRoute,
