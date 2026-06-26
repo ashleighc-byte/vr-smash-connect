@@ -772,7 +772,7 @@ function SchoolBracketPage() {
             <button onClick={regenerateFromSignups}
               style={{
                 display: "inline-block", padding: "0.5rem 1rem", borderRadius: R, fontSize: "0.82rem",
-                fontWeight: 700, cursor: "pointer", border: "none", letterSpacing: "0.02em",
+                fontWeight: 700, cursor: "pointer", letterSpacing: "0.02em",
                 background: "transparent", color: BLUE, border: `1.5px solid ${BLUE}`,
                 width: "100%", textAlign: "center", marginBottom: "0.5rem",
               }}>
