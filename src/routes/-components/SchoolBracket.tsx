@@ -410,6 +410,56 @@ function SchoolBracketPage() {
 
   const sessionDates = getSessionDates(sessions);
 
+  // ── Publish bracket via supabase ──
+  const publishBracket = useCallback(async () => {
+    if (!confirm(`Publish this bracket for ${school}? It will be visible at /bracket/${school.toLowerCase().replace(/\s+/g, "-")}.`)) return;
+    setPublishing(true);
+    setPublishMsg(null);
+    try {
+      const bracketState = {
+        school,
+        players: players.map(p => p.name.trim()).filter(Boolean),
+        matches: Object.fromEntries(
+          Object.entries(matches).filter(([, m]) => m.p1 && m.p2)
+        ),
+        sessionDates: sessionDates.map(d => d.toISOString()),
+        sessionDays,
+        lunchStart,
+        startDate,
+        type,
+        total,
+        sessions,
+        champion: (() => {
+          const allIds = Object.keys(matches);
+          if (!allIds.length) return null;
+          const finalId = allIds.find(id => {
+            const m = matches[id];
+            return m && m.p1 && m.p2 && !Object.keys(matches).some(otherId => {
+              if (otherId === id) return false;
+              const o = matches[otherId];
+              return o && (o.p1 === m.p1 || o.p2 === m.p1 || o.p1 === m.p2 || o.p2 === m.p2);
+            });
+          });
+          return finalId ? matches[finalId]?.winner : null;
+        })(),
+      };
+
+      const { error } = await supabase
+        .from("published_brackets")
+        .upsert({
+          school,
+          bracket_data: bracketState as never,
+          is_live: true,
+          published_at: new Date().toISOString(),
+        } as never, { onConflict: "school" });
+      if (error) throw error;
+      setPublishMsg("\u2713 Bracket published!");
+    } catch {
+      setPublishMsg("Error publishing bracket");
+    }
+    setPublishing(false);
+  }, [school, players, matches, sessionDates, sessionDays, lunchStart, startDate, type, total, sessions]);
+
   // ── Bracket build ──
   function buildBracket(): { rounds: RoundInfo[][]; roundNames: string[] } | null {
     if (n < 2) return null;
