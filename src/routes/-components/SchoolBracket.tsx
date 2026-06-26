@@ -156,7 +156,7 @@ function SchoolBracketPage() {
     if (searchPlayers) {
       const names = searchPlayers.split(",").filter(Boolean);
       if (names.length > 0) {
-        setPlayers(names.map((name, i) => ({ id: Date.now() + i + Math.random(), name })));
+        setPlayers(names.map((name: string, i: number) => ({ id: Date.now() + i + Math.random(), name })));
       }
     }
   }, [searchPlayers]);
@@ -181,59 +181,9 @@ function SchoolBracketPage() {
     setSavedMatchIds(new Set());
   }, []);
 
-  // ── Publish bracket via server function ──
+  // ── Publish bracket state ──
   const [publishing, setPublishing] = useState(false);
   const [publishMsg, setPublishMsg] = useState<string | null>(null);
-
-  const publishBracket = useCallback(async () => {
-    if (!confirm(`Publish this bracket for ${school}? It will be visible at /bracket/${school.toLowerCase().replace(/\s+/g, "-")}.`)) return;
-    setPublishing(true);
-    setPublishMsg(null);
-    try {
-      const bracketState = {
-        school,
-        players: players.map(p => p.name.trim()).filter(Boolean),
-        matches: Object.fromEntries(
-          Object.entries(matches).filter(([, m]) => m.p1 && m.p2)
-        ),
-        sessionDates: sessionDates.map(d => d.toISOString()),
-        sessionDays,
-        lunchStart,
-        startDate,
-        type,
-        total,
-        sessions,
-        champion: (() => {
-          const allIds = Object.keys(matches);
-          if (!allIds.length) return null;
-          const finalId = allIds.find(id => {
-            const m = matches[id];
-            return m && m.p1 && m.p2 && !Object.keys(matches).some(otherId => {
-              if (otherId === id) return false;
-              const o = matches[otherId];
-              return o && (o.p1 === m.p1 || o.p2 === m.p1 || o.p1 === m.p2 || o.p2 === m.p2);
-            });
-          });
-          return finalId ? matches[finalId]?.winner : null;
-        })(),
-      };
-
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { error } = await supabaseAdmin
-        .from("published_brackets")
-        .upsert({
-          school,
-          bracket_data: bracketState,
-          is_live: true,
-          published_at: new Date().toISOString(),
-        }, { onConflict: "school" });
-      if (error) throw error;
-      setPublishMsg("\u2713 Bracket published!");
-    } catch {
-      setPublishMsg("Error publishing bracket");
-    }
-    setPublishing(false);
-  }, [school, players, matches, sessionDates, sessionDays, lunchStart, startDate, type, total, sessions]);
 
   // ── Regenerate from sign-ups via server function ──
   const regenerateFromSignups = useCallback(async () => {
@@ -459,6 +409,56 @@ function SchoolBracketPage() {
   }
 
   const sessionDates = getSessionDates(sessions);
+
+  // ── Publish bracket via supabase ──
+  const publishBracket = useCallback(async () => {
+    if (!confirm(`Publish this bracket for ${school}? It will be visible at /bracket/${school.toLowerCase().replace(/\s+/g, "-")}.`)) return;
+    setPublishing(true);
+    setPublishMsg(null);
+    try {
+      const bracketState = {
+        school,
+        players: players.map(p => p.name.trim()).filter(Boolean),
+        matches: Object.fromEntries(
+          Object.entries(matches).filter(([, m]) => m.p1 && m.p2)
+        ),
+        sessionDates: sessionDates.map(d => d.toISOString()),
+        sessionDays,
+        lunchStart,
+        startDate,
+        type,
+        total,
+        sessions,
+        champion: (() => {
+          const allIds = Object.keys(matches);
+          if (!allIds.length) return null;
+          const finalId = allIds.find(id => {
+            const m = matches[id];
+            return m && m.p1 && m.p2 && !Object.keys(matches).some(otherId => {
+              if (otherId === id) return false;
+              const o = matches[otherId];
+              return o && (o.p1 === m.p1 || o.p2 === m.p1 || o.p1 === m.p2 || o.p2 === m.p2);
+            });
+          });
+          return finalId ? matches[finalId]?.winner : null;
+        })(),
+      };
+
+      const { error } = await supabase
+        .from("published_brackets")
+        .upsert({
+          school,
+          bracket_data: bracketState as never,
+          is_live: true,
+          published_at: new Date().toISOString(),
+        } as never, { onConflict: "school" });
+      if (error) throw error;
+      setPublishMsg("\u2713 Bracket published!");
+    } catch {
+      setPublishMsg("Error publishing bracket");
+    }
+    setPublishing(false);
+  }, [school, players, matches, sessionDates, sessionDays, lunchStart, startDate, type, total, sessions]);
 
   // ── Bracket build ──
   function buildBracket(): { rounds: RoundInfo[][]; roundNames: string[] } | null {
@@ -772,7 +772,7 @@ function SchoolBracketPage() {
             <button onClick={regenerateFromSignups}
               style={{
                 display: "inline-block", padding: "0.5rem 1rem", borderRadius: R, fontSize: "0.82rem",
-                fontWeight: 700, cursor: "pointer", border: "none", letterSpacing: "0.02em",
+                fontWeight: 700, cursor: "pointer", letterSpacing: "0.02em",
                 background: "transparent", color: BLUE, border: `1.5px solid ${BLUE}`,
                 width: "100%", textAlign: "center", marginBottom: "0.5rem",
               }}>
