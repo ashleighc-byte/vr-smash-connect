@@ -77,6 +77,90 @@ export type Database = {
         }
         Relationships: []
       }
+      playoff_school_settings: {
+        Row: {
+          created_at: string
+          id: string
+          school: string
+          signups_open: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          school: string
+          signups_open?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          school?: string
+          signups_open?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      playoff_signups: {
+        Row: {
+          created_at: string | null
+          house: string | null
+          id: string
+          karawhiua_user_id: string | null
+          played_before: string | null
+          school: string
+          status: string | null
+          student_name: string
+          year_group: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          house?: string | null
+          id?: string
+          karawhiua_user_id?: string | null
+          played_before?: string | null
+          school: string
+          status?: string | null
+          student_name: string
+          year_group?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          house?: string | null
+          id?: string
+          karawhiua_user_id?: string | null
+          played_before?: string | null
+          school?: string
+          status?: string | null
+          student_name?: string
+          year_group?: string | null
+        }
+        Relationships: []
+      }
+      published_brackets: {
+        Row: {
+          bracket_data: Json
+          id: string
+          is_live: boolean | null
+          published_at: string | null
+          school: string
+        }
+        Insert: {
+          bracket_data: Json
+          id?: string
+          is_live?: boolean | null
+          published_at?: string | null
+          school: string
+        }
+        Update: {
+          bracket_data?: Json
+          id?: string
+          is_live?: boolean | null
+          published_at?: string | null
+          school?: string
+        }
+        Relationships: []
+      }
       staff_survey_responses: {
         Row: {
           casting_worked: string | null
