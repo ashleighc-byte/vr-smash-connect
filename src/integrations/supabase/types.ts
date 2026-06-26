@@ -77,6 +77,30 @@ export type Database = {
         }
         Relationships: []
       }
+      playoff_school_settings: {
+        Row: {
+          created_at: string
+          id: string
+          school: string
+          signups_open: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          school: string
+          signups_open?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          school?: string
+          signups_open?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       playoff_signups: {
         Row: {
           created_at: string | null
