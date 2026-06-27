@@ -39,6 +39,19 @@ interface BracketMatch {
 
 const TOURNAMENT = "open-day";
 
+type Format = "knockout" | "roundrobin";
+
+// Label knockout rounds from the final backwards: Final, Semifinals, Quarterfinals, ...
+function knockoutRoundLabel(round: number, totalRounds: number): string {
+  const fromEnd = totalRounds - round; // 0 = final
+  if (fromEnd === 0) return "Final";
+  if (fromEnd === 1) return "Semifinals";
+  if (fromEnd === 2) return "Quarterfinals";
+  if (fromEnd === 3) return "Round of 16";
+  if (fromEnd === 4) return "Round of 32";
+  return `Round ${round}`;
+}
+
 // ─── Knockout bracket generator ────────────────────────────────────────
 // Single-elimination. Pre-creates every round, auto-completes BYE matches,
 // and labels future-round slots "TBD" until a winner is recorded.
@@ -71,6 +84,7 @@ function buildKnockoutMatches(playerNames: string[]) {
     const winner = hasBye ? (a || b || null) : null;
     inserts.push({
       tournament_id: TOURNAMENT,
+      format: "knockout",
       round: 1,
       bracket_position: p,
       player_1: a || "BYE",
@@ -94,6 +108,7 @@ function buildKnockoutMatches(playerNames: string[]) {
       // but guard anyway.
       inserts.push({
         tournament_id: TOURNAMENT,
+        format: "knockout",
         round: r,
         bracket_position: p,
         player_1: w1 || "TBD",
@@ -108,11 +123,50 @@ function buildKnockoutMatches(playerNames: string[]) {
   return inserts;
 }
 
+// ─── Round robin generator ─────────────────────────────────────────────
+// Circle method. Every player plays every other player exactly once.
+function buildRoundRobinMatches(playerNames: string[]) {
+  const pool = [...playerNames];
+  if (pool.length % 2 === 1) pool.push("__BYE__");
+  const n = pool.length;
+  const rounds = n - 1;
+  const half = n / 2;
+  const fixed = pool[0];
+  let rotators = pool.slice(1);
+  const inserts: Array<Record<string, unknown>> = [];
+  let position = 0;
+  for (let r = 1; r <= rounds; r++) {
+    for (let i = 0; i < half; i++) {
+      const p1 = i === 0 ? fixed : rotators[rotators.length - i];
+      const p2 = rotators[i === 0 ? 0 : i - 1];
+      // Pair (fixed, rotators[0]) for i=0; otherwise inner pairs.
+      const a = i === 0 ? fixed : rotators[i - 1];
+      const b = i === 0 ? rotators[rotators.length - 1] : rotators[rotators.length - 1 - i];
+      void p1; void p2;
+      if (a === "__BYE__" || b === "__BYE__") continue;
+      inserts.push({
+        tournament_id: TOURNAMENT,
+        format: "roundrobin",
+        round: r,
+        bracket_position: position++,
+        player_1: a,
+        player_2: b,
+        status: "scheduled",
+        winner: null,
+      });
+    }
+    // Rotate: keep fixed; move last rotator to the front of rotators.
+    rotators = [rotators[rotators.length - 1], ...rotators.slice(0, -1)];
+  }
+  return inserts;
+}
+
 function BracketPage() {
   const [matches, setMatches] = useState<BracketMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [canGenerate, setCanGenerate] = useState(false);
+  const [chosenFormat, setChosenFormat] = useState<Format | null>(null);
 
   // Admin state
   const [signups, setSignups] = useState<{ id: string; student_name: string }[]>([]);
@@ -126,7 +180,7 @@ function BracketPage() {
   const fetchMatches = useCallback(async () => {
     const { data } = await supabase
       .from("match_results")
-      .select("id, player_1, player_2, round, status, winner, bracket_position")
+      .select("id, player_1, player_2, round, status, winner, bracket_position, format")
       .eq("tournament_id", TOURNAMENT)
       .order("round", { ascending: true })
       .order("bracket_position", { ascending: true });
@@ -218,12 +272,16 @@ function BracketPage() {
         return;
       }
 
-      const insertData = buildKnockoutMatches(fresh.map((s) => s.student_name));
+      const fmt: Format = chosenFormat ?? "knockout";
+      const insertData =
+        fmt === "roundrobin"
+          ? buildRoundRobinMatches(fresh.map((s) => s.student_name))
+          : buildKnockoutMatches(fresh.map((s) => s.student_name));
       const { error: insertErr } = await supabase.from("match_results").insert(insertData as never);
       if (insertErr) throw insertErr;
 
       const totalRounds = Math.max(...insertData.map((m) => m.round as number));
-      setAdminMsg(`Bracket regenerated — ${insertData.length} matches, ${totalRounds} rounds.`);
+      setAdminMsg(`Regenerated as ${fmt === "roundrobin" ? "round robin" : "knockout"} — ${insertData.length} matches, ${totalRounds} rounds.`);
       setShowRegenConfirm(false);
       setCanGenerate(false);
       await fetchMatches();
@@ -253,8 +311,9 @@ function BracketPage() {
   };
 
   // Generate bracket
-  const handleGenerate = async () => {
+  const handleGenerate = async (fmt: Format) => {
     setGenerating(true);
+    setChosenFormat(fmt);
     try {
       // 1. Fetch all pending signups
       const { data: signups, error: signupErr } = await supabase
@@ -270,7 +329,10 @@ function BracketPage() {
         return;
       }
 
-      const insertData = buildKnockoutMatches(signups.map((s) => s.student_name));
+      const insertData =
+        fmt === "roundrobin"
+          ? buildRoundRobinMatches(signups.map((s) => s.student_name))
+          : buildKnockoutMatches(signups.map((s) => s.student_name));
       const { error: insertErr } = await supabase.from("match_results").insert(insertData as never);
       if (insertErr) throw insertErr;
 
@@ -293,6 +355,11 @@ function BracketPage() {
   const roundKeys = Object.keys(byRound)
     .map(Number)
     .sort((a, b) => a - b);
+  const totalRounds = roundKeys.length > 0 ? Math.max(...roundKeys) : 0;
+  const liveFormat: Format =
+    (matches[0] as unknown as { format?: Format } | undefined)?.format === "roundrobin"
+      ? "roundrobin"
+      : "knockout";
 
   // Find first scheduled match with two real players (skip TBD slots)
   const firstScheduledMatch = matches.find(
@@ -323,25 +390,48 @@ function BracketPage() {
             }}
           >
             <p style={{ fontSize: "0.9rem", color: COLORS.textMuted, margin: "0 0 1rem" }}>
-              No bracket generated yet. Ready to set up the tournament?
+              No bracket generated yet. Choose a tournament format:
             </p>
-            <button
-              disabled={generating}
-              onClick={handleGenerate}
-              style={{
-                padding: "0.75rem 2rem",
-                background: COLORS.red,
-                color: "#fff",
-                border: "none",
-                borderRadius: 8,
-                fontSize: "1rem",
-                fontWeight: 700,
-                cursor: generating ? "not-allowed" : "pointer",
-                opacity: generating ? 0.5 : 1,
-              }}
-            >
-              {generating ? "Generating…" : "Generate bracket"}
-            </button>
+            <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
+              <button
+                disabled={generating}
+                onClick={() => handleGenerate("knockout")}
+                style={{
+                  padding: "0.75rem 1.5rem",
+                  background: COLORS.red,
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 8,
+                  fontSize: "0.95rem",
+                  fontWeight: 700,
+                  cursor: generating ? "not-allowed" : "pointer",
+                  opacity: generating ? 0.5 : 1,
+                }}
+              >
+                {generating ? "Generating…" : "Knockout bracket"}
+              </button>
+              <button
+                disabled={generating}
+                onClick={() => handleGenerate("roundrobin")}
+                style={{
+                  padding: "0.75rem 1.5rem",
+                  background: COLORS.blue,
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 8,
+                  fontSize: "0.95rem",
+                  fontWeight: 700,
+                  cursor: generating ? "not-allowed" : "pointer",
+                  opacity: generating ? 0.5 : 1,
+                }}
+              >
+                {generating ? "Generating…" : "Round robin"}
+              </button>
+            </div>
+            <p style={{ fontSize: "0.75rem", color: COLORS.textMuted, margin: "0.75rem 0 0" }}>
+              Knockout: single elimination — winner of the final tops the leaderboard.<br />
+              Round robin: everyone plays everyone — leaderboard ranks by points.
+            </p>
           </div>
         )}
 
@@ -397,7 +487,7 @@ function BracketPage() {
                 margin: "0 0 0.75rem",
               }}
             >
-              Round {round}
+              {liveFormat === "knockout" ? knockoutRoundLabel(round, totalRounds) : `Round ${round}`}
             </h2>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
               {byRound[round].map((match) => (
