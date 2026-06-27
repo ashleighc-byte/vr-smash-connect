@@ -130,7 +130,7 @@ function BracketPage() {
       }
 
       // 3. Insert all matches
-      const { error: insertErr } = await supabase.from("match_results").insert(insertData);
+      const { error: insertErr } = await supabase.from("match_results").insert(insertData as never);
       if (insertErr) throw insertErr;
 
       setCanGenerate(false);

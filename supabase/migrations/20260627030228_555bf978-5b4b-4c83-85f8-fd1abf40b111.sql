@@ -1,0 +1,1 @@
+COMMENT ON TABLE public.match_results IS 'Match results for tournament matches';
