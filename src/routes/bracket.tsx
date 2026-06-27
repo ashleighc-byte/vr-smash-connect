@@ -50,10 +50,14 @@ function buildKnockoutMatches(playerNames: string[]) {
 
   // Shuffle so seeding is random each generation.
   const shuffled = [...playerNames].sort(() => Math.random() - 0.5);
-  const slots: (string | null)[] = [
-    ...shuffled,
-    ...Array(size - N).fill(null),
-  ];
+  // Distribute players so no pair has two BYEs.
+  // Fill the "player_1" side of every pair first, then the "player_2" side.
+  // With N >= size/2 (always true since size is the next power of two),
+  // every pair has at least one real player.
+  const slots: (string | null)[] = new Array(size).fill(null);
+  let idx = 0;
+  for (let p = 0; p < size / 2 && idx < N; p++) slots[2 * p] = shuffled[idx++];
+  for (let p = 0; p < size / 2 && idx < N; p++) slots[2 * p + 1] = shuffled[idx++];
 
   const inserts: Array<Record<string, unknown>> = [];
   // Winners we already know per position in the round just built.
