@@ -34,6 +34,7 @@ interface BracketMatch {
   round: number;
   status: string;
   winner: string | null;
+  bracket_position: number | null;
 }
 
 const TOURNAMENT = "open-day";
@@ -56,9 +57,10 @@ function BracketPage() {
   const fetchMatches = useCallback(async () => {
     const { data } = await supabase
       .from("match_results")
-      .select("id, player_1, player_2, round, status, winner")
+      .select("id, player_1, player_2, round, status, winner, bracket_position")
       .eq("tournament_id", TOURNAMENT)
-      .order("round", { ascending: true });
+      .order("round", { ascending: true })
+      .order("bracket_position", { ascending: true });
     if (data) {
       setMatches(data as BracketMatch[]);
       if (data.length === 0) setCanGenerate(true);
