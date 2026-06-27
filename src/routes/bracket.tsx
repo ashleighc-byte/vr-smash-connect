@@ -35,6 +35,7 @@ interface BracketMatch {
   status: string;
   winner: string | null;
   bracket_position: number | null;
+  format?: string | null;
 }
 
 const TOURNAMENT = "open-day";
@@ -469,7 +470,9 @@ function BracketPage() {
               {firstScheduledMatch.player_1} vs {firstScheduledMatch.player_2}
             </div>
             <div style={{ fontSize: "0.8rem", color: COLORS.textMuted, marginTop: "0.15rem" }}>
-              Round {firstScheduledMatch.round}
+              {liveFormat === "knockout"
+                ? knockoutRoundLabel(firstScheduledMatch.round, totalRounds)
+                : `Round ${firstScheduledMatch.round}`}
             </div>
           </div>
         )}
