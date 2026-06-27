@@ -52,6 +52,10 @@ function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [students, setStudents] = useState<Row[] | null>(null);
   const [staff, setStaff] = useState<Row[] | null>(null);
+  const [showGenerate, setShowGenerate] = useState(false);
+  const [generatePw, setGeneratePw] = useState("");
+  const [generateMsg, setGenerateMsg] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
 
   async function unlock(e: React.FormEvent) {
     e.preventDefault();
@@ -109,7 +113,90 @@ function AdminPage() {
           <a href="/admin/scores" style={{ background: RED, color: "#f5f5f5", padding: "0.75rem 1.25rem", borderRadius: 4, fontSize: 14, fontWeight: 700, textDecoration: "none", letterSpacing: "0.02em" }}>Scores</a>
           <a href="/admin/report" style={{ background: "#1e5fa8", color: "#f5f5f5", padding: "0.75rem 1.25rem", borderRadius: 4, fontSize: 14, fontWeight: 700, textDecoration: "none", letterSpacing: "0.02em" }}>Survey Report</a>
           <a href="/admin/signups" style={{ background: "#b45309", color: "#f5f5f5", padding: "0.75rem 1.25rem", borderRadius: 4, fontSize: 14, fontWeight: 700, textDecoration: "none", letterSpacing: "0.02em" }}>Sign-ups</a>
+          <a href="/tournament" style={{ background: "#1a7a4a", color: "#f5f5f5", padding: "0.75rem 1.25rem", borderRadius: 4, fontSize: 14, fontWeight: 700, textDecoration: "none", letterSpacing: "0.02em" }}>Live Tournament</a>
+          <a href="#" onClick={(e) => { e.preventDefault(); setShowGenerate(true); }} style={{ background: "#8b4513", color: "#f5f5f5", padding: "0.75rem 1.25rem", borderRadius: 4, fontSize: 14, fontWeight: 700, textDecoration: "none", letterSpacing: "0.02em", cursor: "pointer" }}>Generate Round Robin</a>
         </section>
+
+        {/* ── Round Robin Generate ── */}
+        {showGenerate && (
+          <section style={{ background: "#fff", borderRadius: 6, padding: "1.25rem 1.5rem", marginBottom: "1.5rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
+            <h2 style={{ margin: "0 0 0.75rem", fontSize: "1rem", fontWeight: 700 }}>Generate Round Robin Bracket</h2>
+            <p style={{ margin: "0 0 1rem", fontSize: 14, color: "#555", lineHeight: 1.5 }}>
+              Reads all players from the tournament roster and generates a round-robin schedule.
+              Each player plays every other player exactly once (max 8 players).
+            </p>
+            <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" }}>
+              <label style={{ fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
+                Password:
+                <input
+                  type="password"
+                  value={generatePw}
+                  onChange={(e) => setGeneratePw(e.target.value)}
+                  style={{ padding: "0.5rem 0.75rem", border: `1px solid ${BORDER}`, borderRadius: 4, fontSize: 14 }}
+                />
+              </label>
+              <button
+                disabled={generating || !generatePw}
+                onClick={async () => {
+                  setGenerating(true);
+                  setGenerateMsg(null);
+                  try {
+                    const res = await fetch("/api/playoff/generate-round-robin", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ password: generatePw }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok) {
+                      setGenerateMsg(`Error: ${data.error}`);
+                    } else {
+                      setGenerateMsg(
+                        `✓ Generated ${data.match_count} matches (${data.player_count} players, ${data.rounds} rounds)`
+                      );
+                    }
+                  } catch {
+                    setGenerateMsg("Error: Failed to generate bracket");
+                  } finally {
+                    setGenerating(false);
+                  }
+                }}
+                style={{
+                  padding: "0.6rem 1.25rem",
+                  background: "#8b4513",
+                  color: "#fff",
+                  border: 0,
+                  borderRadius: 4,
+                  fontWeight: 700,
+                  fontSize: 14,
+                  cursor: generating ? "not-allowed" : "pointer",
+                  opacity: generating ? 0.6 : 1,
+                }}
+              >
+                {generating ? "Generating…" : "Generate Bracket"}
+              </button>
+              <button
+                onClick={() => { setShowGenerate(false); setGenerateMsg(null); setGeneratePw(""); }}
+                style={{
+                  padding: "0.6rem 1.25rem",
+                  background: "#e5e5e5",
+                  color: BLACK,
+                  border: 0,
+                  borderRadius: 4,
+                  fontWeight: 700,
+                  fontSize: 14,
+                  cursor: "pointer",
+                }}
+              >
+                Close
+              </button>
+            </div>
+            {generateMsg && (
+              <p style={{ marginTop: "0.75rem", fontSize: 14, fontWeight: 600, color: generateMsg.startsWith("Error") ? RED : "#2e7d32" }}>
+                {generateMsg}
+              </p>
+            )}
+          </section>
+        )}
 
         <Panel title="Student survey — by school" onDownload={() => download("student_survey.csv", toCsv(students))}>
           <BreakdownTable data={bySchool} keyLabel="School" />

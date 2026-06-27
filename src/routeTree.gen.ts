@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TournamentRouteImport } from './routes/tournament'
 import { Route as StandingsRouteImport } from './routes/standings'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SignUpRouteImport } from './routes/sign-up'
@@ -30,8 +31,14 @@ import { Route as ApiPlayoffSignupRouteImport } from './routes/api/playoff.signu
 import { Route as ApiPlayoffSchoolSettingsRouteImport } from './routes/api/playoff.school-settings'
 import { Route as ApiPlayoffPublishBracketRouteImport } from './routes/api/playoff.publish-bracket'
 import { Route as ApiPlayoffPublicBracketRouteImport } from './routes/api/playoff.public-bracket'
+import { Route as ApiPlayoffGenerateRoundRobinRouteImport } from './routes/api/playoff.generate-round-robin'
 import { Route as ApiPlayoffCountRouteImport } from './routes/api/playoff.count'
 
+const TournamentRoute = TournamentRouteImport.update({
+  id: '/tournament',
+  path: '/tournament',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StandingsRoute = StandingsRouteImport.update({
   id: '/standings',
   path: '/standings',
@@ -139,6 +146,12 @@ const ApiPlayoffPublicBracketRoute = ApiPlayoffPublicBracketRouteImport.update({
   path: '/api/playoff/public-bracket',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPlayoffGenerateRoundRobinRoute =
+  ApiPlayoffGenerateRoundRobinRouteImport.update({
+    id: '/api/playoff/generate-round-robin',
+    path: '/api/playoff/generate-round-robin',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPlayoffCountRoute = ApiPlayoffCountRouteImport.update({
   id: '/api/playoff/count',
   path: '/api/playoff/count',
@@ -153,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/sign-up': typeof SignUpRoute
   '/signup': typeof SignupRoute
   '/standings': typeof StandingsRoute
+  '/tournament': typeof TournamentRoute
   '/admin/report': typeof AdminReportRoute
   '/admin/roster': typeof AdminRosterRoute
   '/admin/scores': typeof AdminScoresRoute
@@ -160,6 +174,7 @@ export interface FileRoutesByFullPath {
   '/api/match_results': typeof ApiMatch_resultsRoute
   '/bracket/$school': typeof BracketSchoolRoute
   '/api/playoff/count': typeof ApiPlayoffCountRoute
+  '/api/playoff/generate-round-robin': typeof ApiPlayoffGenerateRoundRobinRoute
   '/api/playoff/public-bracket': typeof ApiPlayoffPublicBracketRoute
   '/api/playoff/publish-bracket': typeof ApiPlayoffPublishBracketRoute
   '/api/playoff/school-settings': typeof ApiPlayoffSchoolSettingsRoute
@@ -177,6 +192,7 @@ export interface FileRoutesByTo {
   '/sign-up': typeof SignUpRoute
   '/signup': typeof SignupRoute
   '/standings': typeof StandingsRoute
+  '/tournament': typeof TournamentRoute
   '/admin/report': typeof AdminReportRoute
   '/admin/roster': typeof AdminRosterRoute
   '/admin/scores': typeof AdminScoresRoute
@@ -184,6 +200,7 @@ export interface FileRoutesByTo {
   '/api/match_results': typeof ApiMatch_resultsRoute
   '/bracket/$school': typeof BracketSchoolRoute
   '/api/playoff/count': typeof ApiPlayoffCountRoute
+  '/api/playoff/generate-round-robin': typeof ApiPlayoffGenerateRoundRobinRoute
   '/api/playoff/public-bracket': typeof ApiPlayoffPublicBracketRoute
   '/api/playoff/publish-bracket': typeof ApiPlayoffPublishBracketRoute
   '/api/playoff/school-settings': typeof ApiPlayoffSchoolSettingsRoute
@@ -202,6 +219,7 @@ export interface FileRoutesById {
   '/sign-up': typeof SignUpRoute
   '/signup': typeof SignupRoute
   '/standings': typeof StandingsRoute
+  '/tournament': typeof TournamentRoute
   '/admin/report': typeof AdminReportRoute
   '/admin/roster': typeof AdminRosterRoute
   '/admin/scores': typeof AdminScoresRoute
@@ -209,6 +227,7 @@ export interface FileRoutesById {
   '/api/match_results': typeof ApiMatch_resultsRoute
   '/bracket/$school': typeof BracketSchoolRoute
   '/api/playoff/count': typeof ApiPlayoffCountRoute
+  '/api/playoff/generate-round-robin': typeof ApiPlayoffGenerateRoundRobinRoute
   '/api/playoff/public-bracket': typeof ApiPlayoffPublicBracketRoute
   '/api/playoff/publish-bracket': typeof ApiPlayoffPublishBracketRoute
   '/api/playoff/school-settings': typeof ApiPlayoffSchoolSettingsRoute
@@ -228,6 +247,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/signup'
     | '/standings'
+    | '/tournament'
     | '/admin/report'
     | '/admin/roster'
     | '/admin/scores'
@@ -235,6 +255,7 @@ export interface FileRouteTypes {
     | '/api/match_results'
     | '/bracket/$school'
     | '/api/playoff/count'
+    | '/api/playoff/generate-round-robin'
     | '/api/playoff/public-bracket'
     | '/api/playoff/publish-bracket'
     | '/api/playoff/school-settings'
@@ -252,6 +273,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/signup'
     | '/standings'
+    | '/tournament'
     | '/admin/report'
     | '/admin/roster'
     | '/admin/scores'
@@ -259,6 +281,7 @@ export interface FileRouteTypes {
     | '/api/match_results'
     | '/bracket/$school'
     | '/api/playoff/count'
+    | '/api/playoff/generate-round-robin'
     | '/api/playoff/public-bracket'
     | '/api/playoff/publish-bracket'
     | '/api/playoff/school-settings'
@@ -276,6 +299,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/signup'
     | '/standings'
+    | '/tournament'
     | '/admin/report'
     | '/admin/roster'
     | '/admin/scores'
@@ -283,6 +307,7 @@ export interface FileRouteTypes {
     | '/api/match_results'
     | '/bracket/$school'
     | '/api/playoff/count'
+    | '/api/playoff/generate-round-robin'
     | '/api/playoff/public-bracket'
     | '/api/playoff/publish-bracket'
     | '/api/playoff/school-settings'
@@ -301,9 +326,11 @@ export interface RootRouteChildren {
   SignUpRoute: typeof SignUpRoute
   SignupRoute: typeof SignupRoute
   StandingsRoute: typeof StandingsRoute
+  TournamentRoute: typeof TournamentRoute
   ApiMatch_resultsRoute: typeof ApiMatch_resultsRoute
   BracketSchoolRoute: typeof BracketSchoolRoute
   ApiPlayoffCountRoute: typeof ApiPlayoffCountRoute
+  ApiPlayoffGenerateRoundRobinRoute: typeof ApiPlayoffGenerateRoundRobinRoute
   ApiPlayoffPublicBracketRoute: typeof ApiPlayoffPublicBracketRoute
   ApiPlayoffPublishBracketRoute: typeof ApiPlayoffPublishBracketRoute
   ApiPlayoffSchoolSettingsRoute: typeof ApiPlayoffSchoolSettingsRoute
@@ -316,6 +343,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tournament': {
+      id: '/tournament'
+      path: '/tournament'
+      fullPath: '/tournament'
+      preLoaderRoute: typeof TournamentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/standings': {
       id: '/standings'
       path: '/standings'
@@ -463,6 +497,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPlayoffPublicBracketRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/playoff/generate-round-robin': {
+      id: '/api/playoff/generate-round-robin'
+      path: '/api/playoff/generate-round-robin'
+      fullPath: '/api/playoff/generate-round-robin'
+      preLoaderRoute: typeof ApiPlayoffGenerateRoundRobinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/playoff/count': {
       id: '/api/playoff/count'
       path: '/api/playoff/count'
@@ -497,9 +538,11 @@ const rootRouteChildren: RootRouteChildren = {
   SignUpRoute: SignUpRoute,
   SignupRoute: SignupRoute,
   StandingsRoute: StandingsRoute,
+  TournamentRoute: TournamentRoute,
   ApiMatch_resultsRoute: ApiMatch_resultsRoute,
   BracketSchoolRoute: BracketSchoolRoute,
   ApiPlayoffCountRoute: ApiPlayoffCountRoute,
+  ApiPlayoffGenerateRoundRobinRoute: ApiPlayoffGenerateRoundRobinRoute,
   ApiPlayoffPublicBracketRoute: ApiPlayoffPublicBracketRoute,
   ApiPlayoffPublishBracketRoute: ApiPlayoffPublishBracketRoute,
   ApiPlayoffSchoolSettingsRoute: ApiPlayoffSchoolSettingsRoute,
@@ -512,3 +555,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
