@@ -290,8 +290,10 @@ function BracketPage() {
     .map(Number)
     .sort((a, b) => a - b);
 
-  // Find first scheduled match
-  const firstScheduledMatch = matches.find((m) => m.status === "scheduled");
+  // Find first scheduled match with two real players (skip TBD slots)
+  const firstScheduledMatch = matches.find(
+    (m) => m.status === "scheduled" && m.player_1 !== "TBD" && m.player_2 !== "TBD",
+  );
 
   return (
     <div style={{ minHeight: "100vh", background: COLORS.bg, color: COLORS.text, fontFamily: "system-ui, sans-serif" }}>
