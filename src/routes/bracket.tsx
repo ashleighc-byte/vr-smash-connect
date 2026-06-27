@@ -138,12 +138,8 @@ function buildRoundRobinMatches(playerNames: string[]) {
   let position = 0;
   for (let r = 1; r <= rounds; r++) {
     for (let i = 0; i < half; i++) {
-      const p1 = i === 0 ? fixed : rotators[rotators.length - i];
-      const p2 = rotators[i === 0 ? 0 : i - 1];
-      // Pair (fixed, rotators[0]) for i=0; otherwise inner pairs.
       const a = i === 0 ? fixed : rotators[i - 1];
-      const b = i === 0 ? rotators[rotators.length - 1] : rotators[rotators.length - 1 - i];
-      void p1; void p2;
+      const b = rotators[rotators.length - 1 - i];
       if (a === "__BYE__" || b === "__BYE__") continue;
       inserts.push({
         tournament_id: TOURNAMENT,
