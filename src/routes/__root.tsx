@@ -77,14 +77,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "VR TT" },
+      { name: "description", content: "VR Smash Connect is a Next.js 14 application for managing a VR table tennis interschool tournament." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "VR TT" },
+      { property: "og:description", content: "VR Smash Connect is a Next.js 14 application for managing a VR table tennis interschool tournament." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "VR TT" },
+      { name: "twitter:description", content: "VR Smash Connect is a Next.js 14 application for managing a VR table tennis interschool tournament." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/cdbc7688-dbb9-456e-b6af-24620dbb858d/id-preview-89911d12--db9006be-287a-4389-b835-b904fee410f6.lovable.app-1782529254142.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/cdbc7688-dbb9-456e-b6af-24620dbb858d/id-preview-89911d12--db9006be-287a-4389-b835-b904fee410f6.lovable.app-1782529254142.png" },
     ],
     links: [
       {
