@@ -31,9 +31,13 @@ export type Database = {
           player_b: string | null
           points_a: number | null
           points_b: number | null
+          round_number: number | null
           school_a: string | null
           school_b: string | null
+          status: string
+          tournament_id: string | null
           walkover: boolean | null
+          winner: string | null
         }
         Insert: {
           created_at?: string | null
@@ -51,9 +55,13 @@ export type Database = {
           player_b?: string | null
           points_a?: number | null
           points_b?: number | null
+          round_number?: number | null
           school_a?: string | null
           school_b?: string | null
+          status?: string
+          tournament_id?: string | null
           walkover?: boolean | null
+          winner?: string | null
         }
         Update: {
           created_at?: string | null
@@ -71,9 +79,13 @@ export type Database = {
           player_b?: string | null
           points_a?: number | null
           points_b?: number | null
+          round_number?: number | null
           school_a?: string | null
           school_b?: string | null
+          status?: string
+          tournament_id?: string | null
           walkover?: boolean | null
+          winner?: string | null
         }
         Relationships: []
       }
