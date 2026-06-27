@@ -34,6 +34,7 @@ export type Database = {
           points_a: number | null
           points_b: number | null
           round: number | null
+          round_number: number | null
           school_a: string | null
           school_b: string | null
           status: string
@@ -60,6 +61,7 @@ export type Database = {
           points_a?: number | null
           points_b?: number | null
           round?: number | null
+          round_number?: number | null
           school_a?: string | null
           school_b?: string | null
           status?: string
@@ -67,8 +69,7 @@ export type Database = {
           walkover?: boolean | null
           winner?: string | null
         }
-        Update:
-        { {
+        Update: {
           created_at?: string | null
           game1_a?: number | null
           game1_b?: number | null
@@ -87,6 +88,7 @@ export type Database = {
           points_a?: number | null
           points_b?: number | null
           round?: number | null
+          round_number?: number | null
           school_a?: string | null
           school_b?: string | null
           status?: string
