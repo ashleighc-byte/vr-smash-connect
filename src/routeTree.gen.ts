@@ -14,7 +14,10 @@ import { Route as StandingsRouteImport } from './routes/standings'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as SchoolBracketRouteImport } from './routes/school-bracket'
+import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as ForTeachersRouteImport } from './routes/for-teachers'
+import { Route as EnterResultRouteImport } from './routes/enter-result'
+import { Route as BracketRouteImport } from './routes/bracket'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BracketSchoolRouteImport } from './routes/bracket.$school'
@@ -59,9 +62,24 @@ const SchoolBracketRoute = SchoolBracketRouteImport.update({
   path: '/school-bracket',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LeaderboardRoute = LeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ForTeachersRoute = ForTeachersRouteImport.update({
   id: '/for-teachers',
   path: '/for-teachers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnterResultRoute = EnterResultRouteImport.update({
+  id: '/enter-result',
+  path: '/enter-result',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BracketRoute = BracketRouteImport.update({
+  id: '/bracket',
+  path: '/bracket',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -75,9 +93,9 @@ const IndexRoute = IndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const BracketSchoolRoute = BracketSchoolRouteImport.update({
-  id: '/bracket/$school',
-  path: '/bracket/$school',
-  getParentRoute: () => rootRouteImport,
+  id: '/$school',
+  path: '/$school',
+  getParentRoute: () => BracketRoute,
 } as any)
 const ApiMatch_resultsRoute = ApiMatch_resultsRouteImport.update({
   id: '/api/match_results',
@@ -161,7 +179,10 @@ const ApiPlayoffCountRoute = ApiPlayoffCountRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/bracket': typeof BracketRouteWithChildren
+  '/enter-result': typeof EnterResultRoute
   '/for-teachers': typeof ForTeachersRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/school-bracket': typeof SchoolBracketRoute
   '/sign-up': typeof SignUpRoute
   '/signup': typeof SignupRoute
@@ -187,7 +208,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/bracket': typeof BracketRouteWithChildren
+  '/enter-result': typeof EnterResultRoute
   '/for-teachers': typeof ForTeachersRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/school-bracket': typeof SchoolBracketRoute
   '/sign-up': typeof SignUpRoute
   '/signup': typeof SignupRoute
@@ -214,7 +238,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/bracket': typeof BracketRouteWithChildren
+  '/enter-result': typeof EnterResultRoute
   '/for-teachers': typeof ForTeachersRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/school-bracket': typeof SchoolBracketRoute
   '/sign-up': typeof SignUpRoute
   '/signup': typeof SignupRoute
@@ -242,7 +269,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/bracket'
+    | '/enter-result'
     | '/for-teachers'
+    | '/leaderboard'
     | '/school-bracket'
     | '/sign-up'
     | '/signup'
@@ -268,7 +298,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/bracket'
+    | '/enter-result'
     | '/for-teachers'
+    | '/leaderboard'
     | '/school-bracket'
     | '/sign-up'
     | '/signup'
@@ -294,7 +327,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/bracket'
+    | '/enter-result'
     | '/for-teachers'
+    | '/leaderboard'
     | '/school-bracket'
     | '/sign-up'
     | '/signup'
@@ -321,14 +357,16 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  BracketRoute: typeof BracketRouteWithChildren
+  EnterResultRoute: typeof EnterResultRoute
   ForTeachersRoute: typeof ForTeachersRoute
+  LeaderboardRoute: typeof LeaderboardRoute
   SchoolBracketRoute: typeof SchoolBracketRoute
   SignUpRoute: typeof SignUpRoute
   SignupRoute: typeof SignupRoute
   StandingsRoute: typeof StandingsRoute
   TournamentRoute: typeof TournamentRoute
   ApiMatch_resultsRoute: typeof ApiMatch_resultsRoute
-  BracketSchoolRoute: typeof BracketSchoolRoute
   ApiPlayoffCountRoute: typeof ApiPlayoffCountRoute
   ApiPlayoffGenerateRoundRobinRoute: typeof ApiPlayoffGenerateRoundRobinRoute
   ApiPlayoffPublicBracketRoute: typeof ApiPlayoffPublicBracketRoute
@@ -378,11 +416,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SchoolBracketRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/leaderboard': {
+      id: '/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof LeaderboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/for-teachers': {
       id: '/for-teachers'
       path: '/for-teachers'
       fullPath: '/for-teachers'
       preLoaderRoute: typeof ForTeachersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/enter-result': {
+      id: '/enter-result'
+      path: '/enter-result'
+      fullPath: '/enter-result'
+      preLoaderRoute: typeof EnterResultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bracket': {
+      id: '/bracket'
+      path: '/bracket'
+      fullPath: '/bracket'
+      preLoaderRoute: typeof BracketRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -401,10 +460,10 @@ declare module '@tanstack/react-router' {
     }
     '/bracket/$school': {
       id: '/bracket/$school'
-      path: '/bracket/$school'
+      path: '/$school'
       fullPath: '/bracket/$school'
       preLoaderRoute: typeof BracketSchoolRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof BracketRoute
     }
     '/api/match_results': {
       id: '/api/match_results'
@@ -530,17 +589,30 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface BracketRouteChildren {
+  BracketSchoolRoute: typeof BracketSchoolRoute
+}
+
+const BracketRouteChildren: BracketRouteChildren = {
+  BracketSchoolRoute: BracketSchoolRoute,
+}
+
+const BracketRouteWithChildren =
+  BracketRoute._addFileChildren(BracketRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  BracketRoute: BracketRouteWithChildren,
+  EnterResultRoute: EnterResultRoute,
   ForTeachersRoute: ForTeachersRoute,
+  LeaderboardRoute: LeaderboardRoute,
   SchoolBracketRoute: SchoolBracketRoute,
   SignUpRoute: SignUpRoute,
   SignupRoute: SignupRoute,
   StandingsRoute: StandingsRoute,
   TournamentRoute: TournamentRoute,
   ApiMatch_resultsRoute: ApiMatch_resultsRoute,
-  BracketSchoolRoute: BracketSchoolRoute,
   ApiPlayoffCountRoute: ApiPlayoffCountRoute,
   ApiPlayoffGenerateRoundRobinRoute: ApiPlayoffGenerateRoundRobinRoute,
   ApiPlayoffPublicBracketRoute: ApiPlayoffPublicBracketRoute,

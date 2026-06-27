@@ -27,11 +27,13 @@ export type Database = {
           games_won_b: number | null
           id: string
           match_day: string | null
+          player_1: string | null
+          player_2: string | null
           player_a: string | null
           player_b: string | null
           points_a: number | null
           points_b: number | null
-          round_number: number | null
+          round: number | null
           school_a: string | null
           school_b: string | null
           status: string
@@ -51,11 +53,13 @@ export type Database = {
           games_won_b?: number | null
           id?: string
           match_day?: string | null
+          player_1?: string | null
+          player_2?: string | null
           player_a?: string | null
           player_b?: string | null
           points_a?: number | null
           points_b?: number | null
-          round_number?: number | null
+          round?: number | null
           school_a?: string | null
           school_b?: string | null
           status?: string
@@ -63,7 +67,8 @@ export type Database = {
           walkover?: boolean | null
           winner?: string | null
         }
-        Update: {
+        Update:
+        { {
           created_at?: string | null
           game1_a?: number | null
           game1_b?: number | null
@@ -75,11 +80,13 @@ export type Database = {
           games_won_b?: number | null
           id?: string
           match_day?: string | null
+          player_1?: string | null
+          player_2?: string | null
           player_a?: string | null
           player_b?: string | null
           points_a?: number | null
           points_b?: number | null
-          round_number?: number | null
+          round?: number | null
           school_a?: string | null
           school_b?: string | null
           status?: string
@@ -123,6 +130,7 @@ export type Database = {
           school: string
           status: string | null
           student_name: string
+          tournament_id: string | null
           year_group: string | null
         }
         Insert: {
@@ -134,6 +142,7 @@ export type Database = {
           school: string
           status?: string | null
           student_name: string
+          tournament_id?: string | null
           year_group?: string | null
         }
         Update: {
@@ -145,6 +154,7 @@ export type Database = {
           school?: string
           status?: string | null
           student_name?: string
+          tournament_id?: string | null
           year_group?: string | null
         }
         Relationships: []
