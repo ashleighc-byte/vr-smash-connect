@@ -64,7 +64,15 @@ function LeaderboardPage() {
 
   // Calculate standings from completed matches
   const standings = useMemo(() => {
-    const completed = matches.filter((m) => m.status === "complete" && m.winner);
+    const completed = matches.filter(
+      (m) =>
+        m.status === "complete" &&
+        m.winner &&
+        m.player_1 !== "BYE" &&
+        m.player_2 !== "BYE" &&
+        m.player_1 !== "TBD" &&
+        m.player_2 !== "TBD",
+    );
     const map = new Map<string, { played: number; won: number; lost: number; points: number }>();
 
     for (const m of completed) {
@@ -103,7 +111,14 @@ function LeaderboardPage() {
   // Find scheduled matches (still to play)
   const scheduledMatches = useMemo(() => {
     return matches
-      .filter((m) => m.status === "scheduled")
+      .filter(
+        (m) =>
+          m.status === "scheduled" &&
+          m.player_1 !== "TBD" &&
+          m.player_2 !== "TBD" &&
+          m.player_1 !== "BYE" &&
+          m.player_2 !== "BYE",
+      )
       .sort((a, b) => (a.round || 1) - (b.round || 1));
   }, [matches]);
 
