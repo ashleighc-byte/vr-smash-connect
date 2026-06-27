@@ -39,6 +39,71 @@ interface BracketMatch {
 
 const TOURNAMENT = "open-day";
 
+// ─── Knockout bracket generator ────────────────────────────────────────
+// Single-elimination. Pre-creates every round, auto-completes BYE matches,
+// and labels future-round slots "TBD" until a winner is recorded.
+function buildKnockoutMatches(playerNames: string[]) {
+  const N = playerNames.length;
+  let size = 1;
+  while (size < N) size *= 2;
+  const rounds = Math.log2(size);
+
+  // Shuffle so seeding is random each generation.
+  const shuffled = [...playerNames].sort(() => Math.random() - 0.5);
+  const slots: (string | null)[] = [
+    ...shuffled,
+    ...Array(size - N).fill(null),
+  ];
+
+  const inserts: Array<Record<string, unknown>> = [];
+  // Winners we already know per position in the round just built.
+  let prevWinners: (string | null)[] = [];
+
+  // Round 1
+  for (let p = 0; p < size / 2; p++) {
+    const a = slots[2 * p];
+    const b = slots[2 * p + 1];
+    const hasBye = !a || !b;
+    const winner = hasBye ? (a || b || null) : null;
+    inserts.push({
+      tournament_id: TOURNAMENT,
+      round: 1,
+      bracket_position: p,
+      player_1: a || "BYE",
+      player_2: b || "BYE",
+      status: hasBye ? "complete" : "scheduled",
+      winner,
+    });
+    prevWinners.push(a && b ? null : winner);
+  }
+
+  // Subsequent rounds — fill in known players from BYE chains.
+  for (let r = 2; r <= rounds; r++) {
+    const count = size / Math.pow(2, r);
+    const nextWinners: (string | null)[] = [];
+    for (let p = 0; p < count; p++) {
+      const w1 = prevWinners[2 * p];
+      const w2 = prevWinners[2 * p + 1];
+      // Both feeders complete via BYE (extremely rare except small fields) → auto-complete.
+      const bothKnown = w1 && w2;
+      // Pure double-BYE shouldn't normally happen because we only push byes at the tail,
+      // but guard anyway.
+      inserts.push({
+        tournament_id: TOURNAMENT,
+        round: r,
+        bracket_position: p,
+        player_1: w1 || "TBD",
+        player_2: w2 || "TBD",
+        status: "scheduled",
+        winner: null,
+      });
+      nextWinners.push(bothKnown ? null : null);
+    }
+    prevWinners = nextWinners;
+  }
+  return inserts;
+}
+
 function BracketPage() {
   const [matches, setMatches] = useState<BracketMatch[]>([]);
   const [loading, setLoading] = useState(true);
@@ -149,41 +214,12 @@ function BracketPage() {
         return;
       }
 
-      const players = fresh.map((s) => s.student_name);
-      const numPlayers = players.length;
-      const isOdd = numPlayers % 2 !== 0;
-      const totalSlots = isOdd ? numPlayers + 1 : numPlayers;
-      const rounds = numPlayers - 1;
-      const matchesPerRound = Math.floor(totalSlots / 2);
-
-      const rotation = [...players];
-      if (isOdd) rotation.push("__BYE__");
-
-      const insertData: Array<Record<string, unknown>> = [];
-
-      for (let r = 0; r < rounds; r++) {
-        for (let m = 0; m < matchesPerRound; m++) {
-          const i = m;
-          const j = totalSlots - 1 - m;
-          const p1 = rotation[i];
-          const p2 = rotation[j];
-          if (p1 === "__BYE__" || p2 === "__BYE__") continue;
-          insertData.push({
-            player_1: p1,
-            player_2: p2,
-            round: r + 1,
-            status: "scheduled",
-            tournament_id: TOURNAMENT,
-          });
-        }
-        const last = rotation.pop()!;
-        rotation.splice(1, 0, last);
-      }
-
+      const insertData = buildKnockoutMatches(fresh.map((s) => s.student_name));
       const { error: insertErr } = await supabase.from("match_results").insert(insertData as never);
       if (insertErr) throw insertErr;
 
-      setAdminMsg(`Bracket regenerated — ${insertData.length} matches, ${rounds} rounds.`);
+      const totalRounds = Math.max(...insertData.map((m) => m.round as number));
+      setAdminMsg(`Bracket regenerated — ${insertData.length} matches, ${totalRounds} rounds.`);
       setShowRegenConfirm(false);
       setCanGenerate(false);
       await fetchMatches();
@@ -230,42 +266,7 @@ function BracketPage() {
         return;
       }
 
-      const players = signups.map((s) => s.student_name);
-
-      // 2. Generate round robin pairs using circle method
-      const numPlayers = players.length;
-      const isOdd = numPlayers % 2 !== 0;
-      const totalSlots = isOdd ? numPlayers + 1 : numPlayers;
-      const rounds = numPlayers - 1;
-      const matchesPerRound = Math.floor(totalSlots / 2);
-
-      // Copy and set up the rotation: fix first player, rotate the rest
-      const rotation = [...players];
-      if (isOdd) rotation.push("__BYE__");
-
-      const insertData: Array<Record<string, unknown>> = [];
-
-      for (let r = 0; r < rounds; r++) {
-        for (let m = 0; m < matchesPerRound; m++) {
-          const i = m;
-          const j = totalSlots - 1 - m;
-          const p1 = rotation[i];
-          const p2 = rotation[j];
-          if (p1 === "__BYE__" || p2 === "__BYE__") continue;
-          insertData.push({
-            player_1: p1,
-            player_2: p2,
-            round: r + 1,
-            status: "scheduled",
-            tournament_id: TOURNAMENT,
-          });
-        }
-        // Rotate: keep first element fixed, rotate rest clockwise
-        const last = rotation.pop()!;
-        rotation.splice(1, 0, last);
-      }
-
-      // 3. Insert all matches
+      const insertData = buildKnockoutMatches(signups.map((s) => s.student_name));
       const { error: insertErr } = await supabase.from("match_results").insert(insertData as never);
       if (insertErr) throw insertErr;
 
