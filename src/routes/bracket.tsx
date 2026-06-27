@@ -178,7 +178,7 @@ function BracketPage() {
         rotation.splice(1, 0, last);
       }
 
-      const { error: insertErr } = await supabase.from("match_results").insert(insertData);
+      const { error: insertErr } = await supabase.from("match_results").insert(insertData as never);
       if (insertErr) throw insertErr;
 
       setAdminMsg(`Bracket regenerated — ${insertData.length} matches, ${rounds} rounds.`);
