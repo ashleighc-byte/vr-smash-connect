@@ -1,0 +1,1 @@
+ALTER TABLE public.match_results ADD COLUMN IF NOT EXISTS bracket_position integer;
