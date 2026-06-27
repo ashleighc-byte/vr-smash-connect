@@ -17,9 +17,20 @@ interface MatchRow {
   status: string;
   winner: string | null;
   bracket_position: number | null;
+  format?: string | null;
 }
 
 const TOURNAMENT = "open-day";
+
+function knockoutRoundLabel(round: number, totalRounds: number): string {
+  const fromEnd = totalRounds - round;
+  if (fromEnd === 0) return "Final";
+  if (fromEnd === 1) return "Semifinals";
+  if (fromEnd === 2) return "Quarterfinals";
+  if (fromEnd === 3) return "Round of 16";
+  if (fromEnd === 4) return "Round of 32";
+  return `Round ${round}`;
+}
 
 function EnterResultPage() {
   const [matches, setMatches] = useState<MatchRow[]>([]);
@@ -30,7 +41,7 @@ function EnterResultPage() {
   const fetchMatches = useCallback(async () => {
     const { data } = await supabase
       .from("match_results")
-      .select("id, player_1, player_2, round, status, winner, bracket_position")
+      .select("id, player_1, player_2, round, status, winner, bracket_position, format")
       .eq("tournament_id", TOURNAMENT)
       .order("round", { ascending: true })
       .order("bracket_position", { ascending: true });
@@ -67,7 +78,11 @@ function EnterResultPage() {
       .eq("id", matchId);
     if (error) {
       alert(error.message);
-    } else if (current && current.bracket_position !== null) {
+    } else if (
+      current &&
+      current.bracket_position !== null &&
+      (current.format ?? "knockout") === "knockout"
+    ) {
       // Advance winner into next round
       const nextRound = current.round + 1;
       const nextPos = Math.floor(current.bracket_position / 2);
@@ -94,6 +109,9 @@ function EnterResultPage() {
   const roundKeys = Object.keys(byRound)
     .map(Number)
     .sort((a, b) => a - b);
+  const totalRounds = roundKeys.length > 0 ? Math.max(...roundKeys) : 0;
+  const liveFormat: "knockout" | "roundrobin" =
+    (matches[0]?.format ?? "knockout") === "roundrobin" ? "roundrobin" : "knockout";
 
   return (
     <div style={{ minHeight: "100vh", background: COLORS.bg, color: COLORS.text, fontFamily: "system-ui, sans-serif" }}>
@@ -131,7 +149,7 @@ function EnterResultPage() {
                 margin: "0 0 0.75rem",
               }}
             >
-              Round {round}
+              {liveFormat === "knockout" ? knockoutRoundLabel(round, totalRounds) : `Round ${round}`}
             </h2>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
               {byRound[round].map((match) => (

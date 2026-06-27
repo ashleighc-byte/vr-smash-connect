@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           bracket_position: number | null
           created_at: string | null
+          format: string
           game1_a: number | null
           game1_b: number | null
           game2_a: number | null
@@ -46,6 +47,7 @@ export type Database = {
         Insert: {
           bracket_position?: number | null
           created_at?: string | null
+          format?: string
           game1_a?: number | null
           game1_b?: number | null
           game2_a?: number | null
@@ -74,6 +76,7 @@ export type Database = {
         Update: {
           bracket_position?: number | null
           created_at?: string | null
+          format?: string
           game1_a?: number | null
           game1_b?: number | null
           game2_a?: number | null

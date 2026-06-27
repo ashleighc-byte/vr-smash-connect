@@ -16,14 +16,23 @@ interface MatchRow {
   round: number;
   status: string;
   winner: string | null;
+  bracket_position: number | null;
+  format?: string | null;
 }
 
-interface StandingsEntry {
+interface PointsEntry {
   player: string;
   played: number;
   won: number;
   lost: number;
   points: number;
+}
+
+interface KnockoutEntry {
+  player: string;
+  placement: number;       // 1 = champion, 2 = runner-up, etc.
+  placementLabel: string;
+  eliminatedIn: string;    // e.g. "Final", "Semifinals"
 }
 
 const TOURNAMENT = "open-day";
@@ -35,7 +44,7 @@ function LeaderboardPage() {
   const fetchMatches = useCallback(async () => {
     const { data } = await supabase
       .from("match_results")
-      .select("id, player_1, player_2, round, status, winner")
+      .select("id, player_1, player_2, round, status, winner, bracket_position, format")
       .eq("tournament_id", TOURNAMENT)
       .order("round", { ascending: true });
     if (data) {
@@ -62,8 +71,26 @@ function LeaderboardPage() {
     return () => { supabase.removeChannel(sub); };
   }, [fetchMatches]);
 
-  // Calculate standings from completed matches
-  const standings = useMemo(() => {
+  const liveFormat: "knockout" | "roundrobin" =
+    (matches[0]?.format ?? "knockout") === "roundrobin" ? "roundrobin" : "knockout";
+
+  const totalRounds = useMemo(
+    () => (matches.length === 0 ? 0 : Math.max(...matches.map((m) => m.round || 1))),
+    [matches],
+  );
+
+  function knockoutLabel(round: number): string {
+    const fromEnd = totalRounds - round;
+    if (fromEnd === 0) return "Final";
+    if (fromEnd === 1) return "Semifinals";
+    if (fromEnd === 2) return "Quarterfinals";
+    if (fromEnd === 3) return "Round of 16";
+    if (fromEnd === 4) return "Round of 32";
+    return `Round ${round}`;
+  }
+
+  // Points-based standings (round robin)
+  const pointsStandings = useMemo<PointsEntry[]>(() => {
     const completed = matches.filter(
       (m) =>
         m.status === "complete" &&
@@ -77,8 +104,6 @@ function LeaderboardPage() {
 
     for (const m of completed) {
       if (!m.winner) continue;
-      const loser = m.winner === m.player_1 ? m.player_2 : m.player_1;
-
       for (const p of [m.player_1, m.player_2]) {
         if (!map.has(p)) {
           map.set(p, { played: 0, won: 0, lost: 0, points: 0 });
@@ -94,7 +119,7 @@ function LeaderboardPage() {
       }
     }
 
-    const arr: StandingsEntry[] = [];
+    const arr: PointsEntry[] = [];
     for (const [player, data] of map) {
       arr.push({ player, ...data });
     }
@@ -107,6 +132,44 @@ function LeaderboardPage() {
 
     return arr;
   }, [matches]);
+
+  // Knockout standings — rank by how deep each player advanced.
+  const knockoutStandings = useMemo<KnockoutEntry[]>(() => {
+    if (liveFormat !== "knockout" || totalRounds === 0) return [];
+    // For each real player, find the latest round they appeared in, and whether they won it.
+    const players = new Map<string, { lastRound: number; lostInRound: number | null; wonFinal: boolean }>();
+    for (const m of matches) {
+      for (const p of [m.player_1, m.player_2]) {
+        if (!p || p === "BYE" || p === "TBD") continue;
+        if (!players.has(p)) players.set(p, { lastRound: 0, lostInRound: null, wonFinal: false });
+        const e = players.get(p)!;
+        if (m.round > e.lastRound) e.lastRound = m.round;
+        if (m.status === "complete" && m.winner && m.winner !== p && (m.player_1 === p || m.player_2 === p)) {
+          if (e.lostInRound === null || m.round > e.lostInRound) e.lostInRound = m.round;
+        }
+        if (m.status === "complete" && m.winner === p && m.round === totalRounds) {
+          e.wonFinal = true;
+        }
+      }
+    }
+    // Sort: champion first, then by eliminatedRound desc (later = better), then name.
+    const arr = Array.from(players.entries()).map(([player, e]) => ({ player, ...e }));
+    arr.sort((a, b) => {
+      if (a.wonFinal !== b.wonFinal) return a.wonFinal ? -1 : 1;
+      const ar = a.lostInRound ?? 0;
+      const br = b.lostInRound ?? 0;
+      if (br !== ar) return br - ar;
+      return a.player.localeCompare(b.player);
+    });
+    return arr.map((e, i) => ({
+      player: e.player,
+      placement: i + 1,
+      placementLabel:
+        e.wonFinal ? "Champion" : e.lostInRound ? `Out in ${knockoutLabel(e.lostInRound)}` : "Still in",
+      eliminatedIn: e.lostInRound ? knockoutLabel(e.lostInRound) : e.wonFinal ? "Won final" : "—",
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matches, liveFormat, totalRounds]);
 
   // Find scheduled matches (still to play)
   const scheduledMatches = useMemo(() => {
@@ -121,6 +184,9 @@ function LeaderboardPage() {
       )
       .sort((a, b) => (a.round || 1) - (b.round || 1));
   }, [matches]);
+
+  const hasStandings =
+    liveFormat === "roundrobin" ? pointsStandings.length > 0 : knockoutStandings.length > 0;
 
   return (
     <div style={{ minHeight: "100vh", background: COLORS.bg, color: COLORS.text, fontFamily: "system-ui, sans-serif" }}>
@@ -156,7 +222,7 @@ function LeaderboardPage() {
           </span>
         </div>
         <p style={{ fontSize: "0.85rem", color: COLORS.textMuted, margin: "0 0 1.5rem" }}>
-          VR Smash Connect — Open Day
+          VR Smash Connect — Open Day · {liveFormat === "knockout" ? "Knockout" : "Round robin"}
         </p>
 
         {loading && (
@@ -165,13 +231,13 @@ function LeaderboardPage() {
           </div>
         )}
 
-        {!loading && standings.length === 0 && (
+        {!loading && !hasStandings && (
           <div style={{ textAlign: "center", padding: "3rem", color: COLORS.textMuted, fontSize: "0.9rem" }}>
             No results yet. Standings will appear here once matches are completed.
           </div>
         )}
 
-        {standings.length > 0 && (
+        {liveFormat === "roundrobin" && pointsStandings.length > 0 && (
           <div
             style={{
               background: COLORS.surface,
@@ -205,7 +271,7 @@ function LeaderboardPage() {
             </div>
 
             {/* Table rows */}
-            {standings.map((entry, idx) => {
+            {pointsStandings.map((entry, idx) => {
               const rank = idx + 1;
               const borderColor =
                 rank === 1 ? COLORS.gold : rank === 2 ? COLORS.silver : rank === 3 ? COLORS.bronze : "transparent";
@@ -236,6 +302,68 @@ function LeaderboardPage() {
                   <span style={{ textAlign: "center", color: COLORS.green }}>{entry.won}</span>
                   <span style={{ textAlign: "center", color: COLORS.red }}>{entry.lost}</span>
                   <span style={{ textAlign: "center", fontWeight: 700, color: COLORS.text }}>{entry.points}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {liveFormat === "knockout" && knockoutStandings.length > 0 && (
+          <div
+            style={{
+              background: COLORS.surface,
+              borderRadius: 12,
+              border: `1px solid ${COLORS.border}`,
+              overflow: "hidden",
+              marginBottom: "2rem",
+            }}
+          >
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "48px 1fr 1fr",
+                gap: 0,
+                padding: "0.6rem 1rem",
+                fontSize: "0.7rem",
+                fontWeight: 700,
+                color: COLORS.textMuted,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                borderBottom: `1px solid ${COLORS.border}`,
+              }}
+            >
+              <span>Rank</span>
+              <span>Player</span>
+              <span>Result</span>
+            </div>
+            {knockoutStandings.map((entry) => {
+              const rank = entry.placement;
+              const borderColor =
+                rank === 1 ? COLORS.gold : rank === 2 ? COLORS.silver : rank === 3 ? COLORS.bronze : "transparent";
+              const medal =
+                rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : null;
+              return (
+                <div
+                  key={entry.player}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "48px 1fr 1fr",
+                    gap: 0,
+                    padding: "0.7rem 1rem",
+                    borderLeft: `3px solid ${borderColor}`,
+                    borderBottom: `1px solid ${COLORS.border}`,
+                    fontSize: "0.9rem",
+                    alignItems: "center",
+                    background: rank <= 3 ? `${COLORS.surfaceAlt}` : "transparent",
+                  }}
+                >
+                  <span style={{ fontSize: "1rem", fontWeight: 700 }}>{medal ?? rank}</span>
+                  <span style={{ fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {entry.player}
+                  </span>
+                  <span style={{ fontSize: "0.8rem", color: rank === 1 ? COLORS.gold : COLORS.textMuted }}>
+                    {entry.placementLabel}
+                  </span>
                 </div>
               );
             })}
