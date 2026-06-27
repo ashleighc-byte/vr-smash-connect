@@ -16,6 +16,7 @@ interface MatchRow {
   round: number;
   status: string;
   winner: string | null;
+  bracket_position: number | null;
 }
 
 const TOURNAMENT = "open-day";
@@ -29,10 +30,10 @@ function EnterResultPage() {
   const fetchMatches = useCallback(async () => {
     const { data } = await supabase
       .from("match_results")
-      .select("id, player_1, player_2, round, status, winner")
+      .select("id, player_1, player_2, round, status, winner, bracket_position")
       .eq("tournament_id", TOURNAMENT)
       .order("round", { ascending: true })
-      .order("id", { ascending: true });
+      .order("bracket_position", { ascending: true });
     if (data) {
       setMatches(data as MatchRow[]);
     }
@@ -59,12 +60,25 @@ function EnterResultPage() {
 
   const handleResult = async (matchId: string, winnerName: string) => {
     setSubmittingId(matchId);
+    const current = matches.find((m) => m.id === matchId);
     const { error } = await supabase
       .from("match_results")
       .update({ winner: winnerName, status: "complete" })
       .eq("id", matchId);
     if (error) {
       alert(error.message);
+    } else if (current && current.bracket_position !== null) {
+      // Advance winner into next round
+      const nextRound = current.round + 1;
+      const nextPos = Math.floor(current.bracket_position / 2);
+      const slotField = current.bracket_position % 2 === 0 ? "player_1" : "player_2";
+      const { error: advErr } = await supabase
+        .from("match_results")
+        .update({ [slotField]: winnerName } as never)
+        .eq("tournament_id", TOURNAMENT)
+        .eq("round", nextRound)
+        .eq("bracket_position", nextPos);
+      if (advErr) console.error("Failed to advance winner:", advErr);
     }
     setSubmittingId(null);
     setOpenId(null);
@@ -185,20 +199,22 @@ function EnterResultPage() {
                       </span>
                       {match.status !== "complete" && (
                         <button
+                          disabled={match.player_1 === "TBD" || match.player_2 === "TBD"}
                           onClick={() => setOpenId(openId === match.id ? null : match.id)}
                           style={{
                             padding: "0.4rem 0.75rem",
-                            background: COLORS.blue,
+                            background: match.player_1 === "TBD" || match.player_2 === "TBD" ? `${COLORS.text}22` : COLORS.blue,
                             color: "#fff",
                             border: "none",
                             borderRadius: 4,
                             fontSize: "0.75rem",
                             fontWeight: 700,
-                            cursor: "pointer",
+                            cursor: match.player_1 === "TBD" || match.player_2 === "TBD" ? "not-allowed" : "pointer",
                             whiteSpace: "nowrap",
+                            opacity: match.player_1 === "TBD" || match.player_2 === "TBD" ? 0.5 : 1,
                           }}
                         >
-                          Enter result
+                          {match.player_1 === "TBD" || match.player_2 === "TBD" ? "Awaiting players" : "Enter result"}
                         </button>
                       )}
                     </div>
