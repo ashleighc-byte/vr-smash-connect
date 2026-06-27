@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       match_results: {
         Row: {
+          bracket_position: number | null
           created_at: string | null
           game1_a: number | null
           game1_b: number | null
@@ -43,6 +44,7 @@ export type Database = {
           winner: string | null
         }
         Insert: {
+          bracket_position?: number | null
           created_at?: string | null
           game1_a?: number | null
           game1_b?: number | null
@@ -70,6 +72,7 @@ export type Database = {
           winner?: string | null
         }
         Update: {
+          bracket_position?: number | null
           created_at?: string | null
           game1_a?: number | null
           game1_b?: number | null
